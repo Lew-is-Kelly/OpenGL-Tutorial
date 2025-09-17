@@ -5,6 +5,10 @@ const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 const int SCREEN_FPS = 60;
 
+//Colour modes
+const int COLOR_MODE_CYAN = 0;
+const int COLOR_MODE_MULTI = 1;
+
 bool initGL();
 /*
 PreCondition:
@@ -41,3 +45,5 @@ Side Effects:
  -Clears the color buffer
  -Swaps the front/back buffer
 */
+
+void handleKeys(unsigned char key, int x, int y);
