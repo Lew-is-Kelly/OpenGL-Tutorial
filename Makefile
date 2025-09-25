@@ -12,7 +12,7 @@ COMPILER_FLAGS = -w
 LINKER_FLAGS = -lGL -lGLU -lglut
 
 #OBJ_NAME specifies the name of our executable
-OBJ_NAME = 01_hello_freeglut
+OBJ_NAME = OpenGL-Tutorial
 
 #This is the target that compiles our executable
 all : $(OBJS)
