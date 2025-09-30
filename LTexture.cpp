@@ -1,9 +1,14 @@
 #include "LTexture.h"
 #include <IL/il.h>
+#include <IL/ilu.h>
 
 LTexture::LTexture() {
   // Initialize texture ID
   mTextureID = 0;
+
+  // Initialize image dimensions
+  mImageWidth = 0;
+  mImageHeight = 0;
 
   // Initialize texture dimensions
   mTextureWidth = 0;
@@ -15,14 +20,68 @@ LTexture::~LTexture() {
   freeTexture();
 }
 
-bool LTexture::loadTextureFromPixels32(GLuint *pixels, GLuint width,
-                                       GLuint height) {
+bool LTexture::loadTextureFromFile(std::string path) {
+  // Texture loading success
+  bool textureLoaded = false;
+
+  // Generate and set current image ID
+  ILuint imgID = 0;
+  ilGenImages(1, &imgID);
+  ilBindImage(imgID);
+
+  // Load image
+  ILboolean success = ilLoadImage(path.c_str());
+
+  // Image loaded successfully
+  if (success == IL_TRUE) {
+    // Convert image to RGBA
+    success = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+    if (success == IL_TRUE) {
+      // Initialize dimensions
+      GLuint imgWidth = (GLuint)ilGetInteger(IL_IMAGE_WIDTH);
+      GLuint imgHeight = (GLuint)ilGetInteger(IL_IMAGE_HEIGHT);
+
+      // Calculate required texture dimensions
+      GLuint texWidth = powerOfTwo(imgWidth);
+      GLuint texHeight = powerOfTwo(imgHeight);
+
+      // Texture is the wrong size
+      if (imgWidth != texWidth || imgHeight != texHeight) {
+        // Place image at upper left
+        iluImageParameter(ILU_PLACEMENT, ILU_UPPER_LEFT);
+
+        // Resize image
+        iluEnlargeCanvas((int)texWidth, (int)texHeight, 1);
+      }
+
+      // Create texture from file pixels
+      textureLoaded = loadTextureFromPixels32((GLuint *)ilGetData(), imgWidth,
+                                              imgHeight, texWidth, texHeight);
+    }
+
+    // Delete file from memory
+    ilDeleteImages(1, &imgID);
+  }
+
+  // Report error
+  if (!textureLoaded) {
+    printf("Unable to load %s\n", path.c_str());
+  }
+
+  return textureLoaded;
+}
+
+bool LTexture::loadTextureFromPixels32(GLuint *pixels, GLuint imgWidth,
+                                       GLuint imgHeight, GLuint texWidth,
+                                       GLuint texHeight) {
   // Free texture if it exists
   freeTexture();
 
-  // Get texture dimensions
-  mTextureWidth = width;
-  mTextureHeight = height;
+  // Get image dimensions
+  mImageWidth = imgWidth;
+  mImageHeight = imgHeight;
+  mTextureWidth = texWidth;
+  mTextureHeight = texHeight;
 
   // Generate texture ID
   glGenTextures(1, &mTextureID);
@@ -31,8 +90,8 @@ bool LTexture::loadTextureFromPixels32(GLuint *pixels, GLuint width,
   glBindTexture(GL_TEXTURE_2D, mTextureID);
 
   // Generate texture
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
-               GL_UNSIGNED_BYTE, pixels);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mTextureWidth, mTextureHeight, 0,
+               GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
   // Set texture parameters
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -52,39 +111,6 @@ bool LTexture::loadTextureFromPixels32(GLuint *pixels, GLuint width,
   return true;
 }
 
-bool LTexture::loadTextureFromFile(std::string path) {
-  // Texture loading success
-  bool textureLoaded = false;
-
-  // Generate and set current image ID
-  ILuint imgID = 0;
-  ilGenImages(1, &imgID);
-  ilBindImage(imgID);
-
-  // Load image
-  ILboolean success = ilLoadImage(path.c_str());
-
-  // Image loaded successfully
-  if (success == IL_TRUE) {
-    // Convert image to RGBA
-    success = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
-
-    if (success == IL_TRUE) {
-      // Create texture from file pixels
-      textureLoaded = loadTextureFromPixels32(
-          (GLuint *)ilGetData(), (GLuint)ilGetInteger(IL_IMAGE_WIDTH),
-          (GLuint)ilGetInteger(IL_IMAGE_HEIGHT));
-    }
-    // Delete file from memory
-    ilDeleteImages(1, &imgID);
-  }
-  // Report error
-  if (!textureLoaded) {
-    printf("Unable to load %s\n", path.c_str());
-  }
-  return textureLoaded;
-}
-
 void LTexture::freeTexture() {
   // Delete texture
   if (mTextureID != 0) {
@@ -92,6 +118,8 @@ void LTexture::freeTexture() {
     mTextureID = 0;
   }
 
+  mImageWidth = 0;
+  mImageHeight = 0;
   mTextureWidth = 0;
   mTextureHeight = 0;
 }
@@ -104,13 +132,13 @@ void LTexture::render(GLfloat x, GLfloat y, LFRect *clip) {
 
     // Texture coordinates
     GLfloat texTop = 0.f;
-    GLfloat texBottom = 1.f;
+    GLfloat texBottom = (GLfloat)mImageHeight / (GLfloat)mTextureHeight;
     GLfloat texLeft = 0.f;
-    GLfloat texRight = 1.f;
+    GLfloat texRight = (GLfloat)mImageWidth / (GLfloat)mTextureWidth;
 
     // Vertex coordinates
-    GLfloat quadWidth = mTextureWidth;
-    GLfloat quadHeight = mTextureHeight;
+    GLfloat quadWidth = mImageWidth;
+    GLfloat quadHeight = mImageHeight;
 
     // Handle clipping
     if (clip != NULL) {
@@ -124,6 +152,7 @@ void LTexture::render(GLfloat x, GLfloat y, LFRect *clip) {
       quadWidth = clip->w;
       quadHeight = clip->h;
     }
+
     // Move to rendering point
     glTranslatef(x, y, 0.f);
 
@@ -149,3 +178,21 @@ GLuint LTexture::getTextureID() { return mTextureID; }
 GLuint LTexture::textureWidth() { return mTextureWidth; }
 
 GLuint LTexture::textureHeight() { return mTextureHeight; }
+
+GLuint LTexture::imageWidth() { return mImageWidth; }
+
+GLuint LTexture::imageHeight() { return mImageHeight; }
+
+GLuint LTexture::powerOfTwo(GLuint num) {
+  if (num != 0) {
+    num--;
+    num |= (num >> 1);  // Or first 2 bits
+    num |= (num >> 2);  // Or next 2 bits
+    num |= (num >> 4);  // Or next 4 bits
+    num |= (num >> 8);  // Or next 8 bits
+    num |= (num >> 16); // Or next 16 bits
+    num++;
+  }
+
+  return num;
+}

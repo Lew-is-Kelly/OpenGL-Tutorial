@@ -29,8 +29,21 @@ public:
   */
 
   bool loadTextureFromFile(std::string path);
+  /*
+  Pre Condition:
+   -A valid OpenGL context
+   -Initialized DevIL
+  Post Condition:
+   -Creates a texture from the given file
+   -Pads image to have power-of-two dimensions
+   -Reports error to console if texture could not be created
+  Side Effects:
+   -Binds a NULL texture
+  */
 
-  bool loadTextureFromPixels32(GLuint *pixels, GLuint width, GLuint height);
+  bool loadTextureFromPixels32(GLuint *pixels, GLuint imgWidth,
+                               GLuint imgHeight, GLuint texWidth,
+                               GLuint texHeight);
   /*
   Pre Condition:
    -A valid OpenGL context
@@ -94,13 +107,47 @@ public:
    -None
   */
 
+  GLuint imageWidth();
+  /*
+  Pre Condition:
+   -None
+  Post Condition:
+   -Returns unpadded image width
+  Side Effects:
+   -None
+  */
+
+  GLuint imageHeight();
+  /*
+  Pre Condition:
+   -None
+  Post Condition:
+   -Returns unpadded image height
+  Side Effects:
+   -None
+  */
+
 private:
+  GLuint powerOfTwo(GLuint num);
+  /*
+  Pre Condition:
+   -None
+  Post Condition:
+   -Returns nearest power of two integer that is greater
+  Side Effects:
+   -None
+  */
+
   // Texture name
   GLuint mTextureID;
 
   // Texture dimensions
   GLuint mTextureWidth;
   GLuint mTextureHeight;
+
+  // Unpadded image dimensions
+  GLuint mImageWidth;
+  GLuint mImageHeight;
 };
 
 #endif
