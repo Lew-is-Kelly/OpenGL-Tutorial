@@ -1,42 +1,28 @@
-#ifndef LUTIL_H
-#define LUTIL_H
-
 #include "LOpenGL.h"
-#include <stdio.h>
 
-// Screen constants
+//Screen Constants
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 const int SCREEN_FPS = 60;
 
+//Colour modes
+const int COLOR_MODE_CYAN = 0;
+const int COLOR_MODE_MULTI = 1;
+
 bool initGL();
 /*
-Pre Condition:
- -A valid OpenGL context
+PreCondition:
+   -A valid OpenGL context
 Post Condition:
- -Initializes viewport, matrices, and clear color
+ -Initializes matrices and clear color
  -Reports to console if there was an OpenGL error
  -Returns false if there was an error in initialization
 Side Effects:
- -Sets viewport to the fill rendering area
- -Projection matrix is set to an orthographic matrix
+ -Projection matrix is set to identity matrix
  -Modelview matrix is set to identity matrix
  -Matrix mode is set to modelview
  -Clear color is set to black
- -Texturing is enabled
-*/
-
-bool loadMedia();
-/*
-Pre Condition:
- -A valid OpenGL context
-Post Condition:
- -Loads media to use in the program
- -Reports to console if there was an error in loading the media
- -Returns true if the media loaded successfully
-Side Effects:
- -None
-*/
+ */
 
 void update();
 /*
@@ -60,4 +46,4 @@ Side Effects:
  -Swaps the front/back buffer
 */
 
-#endif
+void handleKeys(unsigned char key, int x, int y);
