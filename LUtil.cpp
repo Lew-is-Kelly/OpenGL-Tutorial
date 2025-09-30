@@ -4,7 +4,7 @@
 #include <IL/ilu.h>
 
 // Non-power-of-two texture
-LTexture gNon2NTexture;
+LTexture gCircleTexture;
 
 bool initGL() {
   // Set the viewport
@@ -49,10 +49,42 @@ bool initGL() {
 
 bool loadMedia() {
   // Load texture
-  if (!gNon2NTexture.loadTextureFromFile("opengl.png")) {
-    printf("Unable to load non-power-of-two texture!\n");
+  if (!gCircleTexture.loadTextureFromFile("circle.png")) {
+    printf("Unable to load circle texture!\n");
     return false;
   }
+
+  // Lock texture for modification
+  gCircleTexture.lock();
+  // Calculate target color
+  GLuint targetColor;
+  GLubyte *colors = (GLubyte *)&targetColor;
+  colors[0] = 000;
+  colors[1] = 255;
+  colors[2] = 255;
+  colors[3] = 255;
+
+  // Replace target color with transparent black
+  GLuint *pixels = gCircleTexture.getPixelData32();
+  GLuint pixelCount =
+      gCircleTexture.textureWidth() * gCircleTexture.textureHeight();
+  for (int i = 0; i < pixelCount; ++i) {
+    if (pixels[i] == targetColor) {
+      pixels[i] = 0;
+    }
+  }
+
+  // Diagonal Lines
+  for (int y = 0; y < gCircleTexture.imageHeight(); ++y) {
+    for (int x = 0; x < gCircleTexture.imageWidth(); ++x) {
+      if (y % 10 != x % 10) {
+        gCircleTexture.setPixel32(x, y, 0);
+      }
+    }
+  }
+
+  // Update texture
+  gCircleTexture.unlock();
 
   return true;
 }
@@ -63,9 +95,9 @@ void render() {
   // Clear color buffer
   glClear(GL_COLOR_BUFFER_BIT);
 
-  // Render OpenGL texture
-  gNon2NTexture.render((SCREEN_WIDTH - gNon2NTexture.imageWidth()) / 2.f,
-                       (SCREEN_HEIGHT - gNon2NTexture.imageHeight()) / 2.f);
+  // Render circle
+  gCircleTexture.render((SCREEN_WIDTH - gCircleTexture.imageWidth()) / 2.f,
+                        (SCREEN_HEIGHT - gCircleTexture.imageHeight()) / 2.f);
 
   // Update screen
   glutSwapBuffers();

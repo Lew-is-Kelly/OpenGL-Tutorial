@@ -28,6 +28,60 @@ public:
    -None
   */
 
+  bool lock();
+  /*
+  Pre Condition:
+   -An existing unlocked texture
+  Post Condition:
+   -Gets member pixels from texture data
+   -Returns true if texture pixels were retrieved
+  Side Effects:
+   -Binds a NULL texture
+  */
+
+  bool unlock();
+  /*
+  Pre Condition:
+   -A locked texture
+  Post Condition:
+   -Updates texture with member pixels
+   -Returns true if texture pixels were updated
+  Side Effects:
+   -Binds a NULL texture
+  */
+
+  GLuint *getPixelData32();
+  /*
+  Pre Condition:
+   -Available member pixels
+  Post Condition:
+   -Returns member pixels
+  Side Effects:
+   -None
+  */
+
+  GLuint getPixel32(GLuint x, GLuint y);
+  /*
+  Pre Condition:
+   -Available member pixels
+  Post Condition:
+   -Returns pixel at given position
+   -Function will segfault if the texture is not locked.
+  Side Effects:
+   -None
+  */
+
+  void setPixel32(GLuint x, GLuint y, GLuint pixel);
+  /*
+  Pre Condition:
+   -Available member pixels
+  Post Condition:
+   -Sets pixel at given position
+   -Function will segfault if the texture is not locked.
+  Side Effects:
+   -None
+  */
+
   bool loadTextureFromFile(std::string path);
   /*
   Pre Condition:
@@ -140,6 +194,9 @@ private:
 
   // Texture name
   GLuint mTextureID;
+
+  // Current pixels
+  GLuint *mPixels;
 
   // Texture dimensions
   GLuint mTextureWidth;

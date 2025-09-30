@@ -5,6 +5,7 @@
 LTexture::LTexture() {
   // Initialize texture ID
   mTextureID = 0;
+  mPixels = NULL;
 
   // Initialize image dimensions
   mImageWidth = 0;
@@ -118,10 +119,71 @@ void LTexture::freeTexture() {
     mTextureID = 0;
   }
 
+  // Delete pixels
+  if (mPixels != NULL) {
+    delete[] mPixels;
+    mPixels = NULL;
+  }
+
   mImageWidth = 0;
   mImageHeight = 0;
   mTextureWidth = 0;
   mTextureHeight = 0;
+}
+
+bool LTexture::lock() {
+  // If texture is not locked and a texture exists
+  if (mPixels == NULL && mTextureID != 0) {
+    // Allocate memory for texture data
+    GLuint size = mTextureWidth * mTextureHeight;
+    mPixels = new GLuint[size];
+
+    // Set current texture
+    glBindTexture(GL_TEXTURE_2D, mTextureID);
+
+    // Get pixels
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, mPixels);
+
+    // Unbind texture
+    glBindTexture(GL_TEXTURE_2D, NULL);
+
+    return true;
+  }
+
+  return false;
+}
+
+bool LTexture::unlock() {
+  // If texture is locked and a texture exists
+  if (mPixels != NULL && mTextureID != 0) {
+    // Set current texture
+    glBindTexture(GL_TEXTURE_2D, mTextureID);
+
+    // Update texture
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, mTextureWidth, mTextureHeight,
+                    GL_RGBA, GL_UNSIGNED_BYTE, mPixels);
+
+    // Delete pixels
+    delete[] mPixels;
+    mPixels = NULL;
+
+    // Unbind texture
+    glBindTexture(GL_TEXTURE_2D, NULL);
+
+    return true;
+  }
+
+  return false;
+}
+
+GLuint *LTexture::getPixelData32() { return mPixels; }
+
+GLuint LTexture::getPixel32(GLuint x, GLuint y) {
+  return mPixels[y * mTextureWidth + x];
+}
+
+void LTexture::setPixel32(GLuint x, GLuint y, GLuint pixel) {
+  mPixels[y * mTextureWidth + x] = pixel;
 }
 
 void LTexture::render(GLfloat x, GLfloat y, LFRect *clip) {
