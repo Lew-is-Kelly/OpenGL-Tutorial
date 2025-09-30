@@ -1,11 +1,13 @@
-
 #include "LUtil.h"
 #include "LTexture.h"
 #include <IL/il.h>
 #include <IL/ilu.h>
 
-// File loaded texture
-LTexture gLoadedTexture;
+// Sprite texture
+LTexture gArrowTexture;
+
+// Sprite area
+LFRect gArrowClips[4];
 
 bool initGL() {
   // Set the viewport
@@ -48,9 +50,30 @@ bool initGL() {
 }
 
 bool loadMedia() {
+  // Set clip rectangles
+  gArrowClips[0].x = 0.f;
+  gArrowClips[0].y = 0.f;
+  gArrowClips[0].w = 128.f;
+  gArrowClips[0].h = 128.f;
+
+  gArrowClips[1].x = 128.f;
+  gArrowClips[1].y = 0.f;
+  gArrowClips[1].w = 128.f;
+  gArrowClips[1].h = 128.f;
+
+  gArrowClips[2].x = 0.f;
+  gArrowClips[2].y = 128.f;
+  gArrowClips[2].w = 128.f;
+  gArrowClips[2].h = 128.f;
+
+  gArrowClips[3].x = 128.f;
+  gArrowClips[3].y = 128.f;
+  gArrowClips[3].w = 128.f;
+  gArrowClips[3].h = 128.f;
+
   // Load texture
-  if (!gLoadedTexture.loadTextureFromFile("texture.png")) {
-    printf("Unable to load file texture!\n");
+  if (!gArrowTexture.loadTextureFromFile("arrows.png")) {
+    printf("Unable to load arrow texture!\n");
     return false;
   }
 
@@ -65,12 +88,12 @@ void render() {
   // Clear color buffer
   glClear(GL_COLOR_BUFFER_BIT);
 
-  // Calculate centered offsets
-  GLfloat x = (SCREEN_WIDTH - gLoadedTexture.textureWidth()) / 2.f;
-  GLfloat y = (SCREEN_HEIGHT - gLoadedTexture.textureHeight()) / 2.f;
-
-  // Render texture
-  gLoadedTexture.render(x, y);
+  // Render arrows
+  gArrowTexture.render(0.f, 0.f, &gArrowClips[0]);
+  gArrowTexture.render(SCREEN_WIDTH - gArrowClips[1].w, 0.f, &gArrowClips[1]);
+  gArrowTexture.render(0.f, SCREEN_HEIGHT - gArrowClips[2].h, &gArrowClips[2]);
+  gArrowTexture.render(SCREEN_WIDTH - gArrowClips[3].w,
+                       SCREEN_HEIGHT - gArrowClips[3].h, &gArrowClips[3]);
 
   // Update screen
   glutSwapBuffers();

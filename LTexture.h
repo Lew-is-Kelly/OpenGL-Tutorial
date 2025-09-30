@@ -1,6 +1,7 @@
 #ifndef LTEXTURE_H
 #define LTEXTURE_H
 
+#include "LFRect.h"
 #include "LOpenGL.h"
 #include <stdio.h>
 #include <string>
@@ -51,13 +52,14 @@ public:
    -None
   */
 
-  void render(GLfloat x, GLfloat y);
+  void render(GLfloat x, GLfloat y, LFRect *clip = NULL);
   /*
   Pre Condition:
    -A valid OpenGL context
    -Active modelview matrix
   Post Condition:
-   -Translates to given position and renders textured quad
+   -Translates to given position and renders the texture area mapped to a quad
+   -If given texture clip is NULL, the full texture is rendered
   Side Effects:
    -Binds member texture ID
   */

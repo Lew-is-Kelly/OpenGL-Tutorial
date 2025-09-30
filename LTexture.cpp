@@ -96,12 +96,34 @@ void LTexture::freeTexture() {
   mTextureHeight = 0;
 }
 
-void LTexture::render(GLfloat x, GLfloat y) {
+void LTexture::render(GLfloat x, GLfloat y, LFRect *clip) {
   // If the texture exists
   if (mTextureID != 0) {
     // Remove any previous transformations
     glLoadIdentity();
 
+    // Texture coordinates
+    GLfloat texTop = 0.f;
+    GLfloat texBottom = 1.f;
+    GLfloat texLeft = 0.f;
+    GLfloat texRight = 1.f;
+
+    // Vertex coordinates
+    GLfloat quadWidth = mTextureWidth;
+    GLfloat quadHeight = mTextureHeight;
+
+    // Handle clipping
+    if (clip != NULL) {
+      // Texture coordinates
+      texLeft = clip->x / mTextureWidth;
+      texRight = (clip->x + clip->w) / mTextureWidth;
+      texTop = clip->y / mTextureHeight;
+      texBottom = (clip->y + clip->h) / mTextureHeight;
+
+      // Vertex coordinates
+      quadWidth = clip->w;
+      quadHeight = clip->h;
+    }
     // Move to rendering point
     glTranslatef(x, y, 0.f);
 
@@ -110,14 +132,14 @@ void LTexture::render(GLfloat x, GLfloat y) {
 
     // Render textured quad
     glBegin(GL_QUADS);
-    glTexCoord2f(0.f, 0.f);
+    glTexCoord2f(texLeft, texTop);
     glVertex2f(0.f, 0.f);
-    glTexCoord2f(1.f, 0.f);
-    glVertex2f(mTextureWidth, 0.f);
-    glTexCoord2f(1.f, 1.f);
-    glVertex2f(mTextureWidth, mTextureHeight);
-    glTexCoord2f(0.f, 1.f);
-    glVertex2f(0.f, mTextureHeight);
+    glTexCoord2f(texRight, texTop);
+    glVertex2f(quadWidth, 0.f);
+    glTexCoord2f(texRight, texBottom);
+    glVertex2f(quadWidth, quadHeight);
+    glTexCoord2f(texLeft, texBottom);
+    glVertex2f(0.f, quadHeight);
     glEnd();
   }
 }
