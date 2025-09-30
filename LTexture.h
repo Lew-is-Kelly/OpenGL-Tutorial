@@ -3,6 +3,7 @@
 
 #include "LOpenGL.h"
 #include <stdio.h>
+#include <string>
 
 class LTexture {
 public:
@@ -25,6 +26,8 @@ public:
   Side Effects:
    -None
   */
+
+  bool loadTextureFromFile(std::string path);
 
   bool loadTextureFromPixels32(GLuint *pixels, GLuint width, GLuint height);
   /*
