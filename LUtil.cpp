@@ -1,28 +1,79 @@
 #include "LUtil.h"
+#include "LTexture.h"
+#include <IL/il.h>
+#include <IL/ilu.h>
 
-//The current colour rendering mode
-int gColorMode = COLOR_MODE_CYAN;
+// Sprite texture
+LTexture gArrowTexture;
 
-//The projection scale
-GLfloat gProjectionScale = 1.f;
+// Sprite area
+LFRect gArrowClips[4];
 
 bool initGL() {
-  //Initialize Projection Matrix
+  // Set the viewport
+  glViewport(0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+  // Initialize Projection Matrix
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glOrtho(0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, 1.0, -1.0);
 
-  //Initialize Modelview Matrix
+  // Initialize Modelview Matrix
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  //Initialize clear color
+  // Initialize clear color
   glClearColor(0.f, 0.f, 0.f, 1.f);
 
-  //Check for error
+  // Enable texturing
+  glEnable(GL_TEXTURE_2D);
+
+  // Check for error
   GLenum error = glGetError();
   if (error != GL_NO_ERROR) {
     printf("Error initializing OpenGL! %s\n", gluErrorString(error));
+    return false;
+  }
+
+  // Initialize DevIL
+  ilInit();
+  ilClearColour(255, 255, 255, 000);
+
+  // Check for error
+  ILenum ilError = ilGetError();
+  if (ilError != IL_NO_ERROR) {
+    printf("Error initializing DevIL! %s\n", iluErrorString(ilError));
+    return false;
+  }
+
+  return true;
+}
+
+bool loadMedia() {
+  // Set clip rectangles
+  gArrowClips[0].x = 0.f;
+  gArrowClips[0].y = 0.f;
+  gArrowClips[0].w = 128.f;
+  gArrowClips[0].h = 128.f;
+
+  gArrowClips[1].x = 128.f;
+  gArrowClips[1].y = 0.f;
+  gArrowClips[1].w = 128.f;
+  gArrowClips[1].h = 128.f;
+
+  gArrowClips[2].x = 0.f;
+  gArrowClips[2].y = 128.f;
+  gArrowClips[2].w = 128.f;
+  gArrowClips[2].h = 128.f;
+
+  gArrowClips[3].x = 128.f;
+  gArrowClips[3].y = 128.f;
+  gArrowClips[3].w = 128.f;
+  gArrowClips[3].h = 128.f;
+
+  // Load texture
+  if (!gArrowTexture.loadTextureFromFile("arrows.png")) {
+    printf("Unable to load arrow texture!\n");
     return false;
   }
 
@@ -30,68 +81,20 @@ bool initGL() {
 }
 
 void update() {
-  //No per frame logic
+  // No per frame logic
 }
 
 void render() {
-  //Clear color buffer
+  // Clear color buffer
   glClear(GL_COLOR_BUFFER_BIT);
 
-  //Reset modelview matrix
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
+  // Render arrows
+  gArrowTexture.render(0.f, 0.f, &gArrowClips[0]);
+  gArrowTexture.render(SCREEN_WIDTH - gArrowClips[1].w, 0.f, &gArrowClips[1]);
+  gArrowTexture.render(0.f, SCREEN_HEIGHT - gArrowClips[2].h, &gArrowClips[2]);
+  gArrowTexture.render(SCREEN_WIDTH - gArrowClips[3].w,
+                       SCREEN_HEIGHT - gArrowClips[3].h, &gArrowClips[3]);
 
-  //Move to centre of screen
-  glTranslatef(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f, 0.f);
-
-  //Render quad
-  if (gColorMode == COLOR_MODE_CYAN) {
-    //Solid Cyan
-    glBegin(GL_QUADS);
-      glColor3f(0.f, 1.f, 1.f);
-      glVertex2f(-50.f, -50.f);
-      glVertex2f(50.f, -50.f);
-      glVertex2f(50.f, 50.f);
-      glVertex2f(-50.f, 50.f);
-    glEnd();
-  } else {
-    //RYGB Mix
-    glBegin(GL_QUADS);
-      glColor3f(1.f, 0.f, 0.f); glVertex2f(-50.f, -50.f);
-      glColor3f(1.f, 1.f, 0.f); glVertex2f(50.f, -50.f);
-      glColor3f(0.f, 1.f, 0.f); glVertex2f(50.f, 50.f);
-      glColor3f(0.f, 0.f, 1.f); glVertex2f(-50.f, 50.f);
-    glEnd();
-  }
-
-  //Update screen
+  // Update screen
   glutSwapBuffers();
-}
-
-void handleKeys(unsigned char key, int x, int y) {
-  //Toggle colour mode
-  if (key == 'q') {
-    if (gColorMode == COLOR_MODE_CYAN) {
-      gColorMode = COLOR_MODE_MULTI;
-    } else {
-      gColorMode = COLOR_MODE_CYAN;
-    }
-  } else if (key == 'e') {
-    //Cycle through projection scales
-    if (gProjectionScale == 1.f) {
-      //Zoom out
-      gProjectionScale = 2.f;
-    } else if (gProjectionScale == 2.f) {
-      //Zoom in
-      gProjectionScale = 0.5f;
-    } else if (gProjectionScale == 0.5f) {
-      //Regular zoom
-      gProjectionScale = 1.f;
-    }
-
-    //Update projection matrix
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0.0, SCREEN_WIDTH * gProjectionScale, SCREEN_HEIGHT * gProjectionScale, 0.0, 1.0, -1.0);
-  }
 }
