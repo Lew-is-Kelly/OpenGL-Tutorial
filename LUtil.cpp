@@ -1,7 +1,9 @@
-#include "LUtil.h"
 
-// Camera Postition
-GLfloat gCameraX = 0.f, gCameraY = 0.f;
+#include "LUtil.h"
+#include "LTexture.h"
+
+// Checkerboard texture
+LTexture gCheckerBoardTexture;
 
 bool initGL() {
   // Set the viewport
@@ -16,16 +18,54 @@ bool initGL() {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  // Save the default modelview matrix
-  glPushMatrix();
-
   // Initialize clear color
   glClearColor(0.f, 0.f, 0.f, 1.f);
+
+  // Enable texturing
+  glEnable(GL_TEXTURE_2D);
 
   // Check for error
   GLenum error = glGetError();
   if (error != GL_NO_ERROR) {
     printf("Error initializing OpenGL! %s\n", gluErrorString(error));
+    return false;
+  }
+
+  return true;
+}
+
+bool loadMedia() {
+  // Checkerboard pixels
+  const int CHECKERBOARD_WIDTH = 128;
+  const int CHECKERBOARD_HEIGHT = 128;
+  const int CHECKERBOARD_PIXEL_COUNT = CHECKERBOARD_WIDTH * CHECKERBOARD_HEIGHT;
+  GLuint checkerBoard[CHECKERBOARD_PIXEL_COUNT];
+
+  // Go through pixels
+  for (int i = 0; i < CHECKERBOARD_PIXEL_COUNT; ++i) {
+    // Get the individual color components
+    GLubyte *colors = (GLubyte *)&checkerBoard[i];
+
+    // If the 5th bit of the x and y offsets of the pixel do not match
+    if (i / 128 & 16 ^ i % 128 & 16) {
+      // Set pixel to white
+      colors[0] = 0xFF;
+      colors[1] = 0xFF;
+      colors[2] = 0xFF;
+      colors[3] = 0xFF;
+    } else {
+      // Set pixel to red
+      colors[0] = 0xFF;
+      colors[1] = 0x00;
+      colors[2] = 0x00;
+      colors[3] = 0xFF;
+    }
+  }
+
+  // Load texture
+  if (!gCheckerBoardTexture.loadTextureFromPixels32(
+          checkerBoard, CHECKERBOARD_WIDTH, CHECKERBOARD_HEIGHT)) {
+    printf("Unable to load checkerboard texture!\n");
     return false;
   }
 
@@ -40,84 +80,13 @@ void render() {
   // Clear color buffer
   glClear(GL_COLOR_BUFFER_BIT);
 
-  // Pop default matrix onto current matrix
-  glMatrixMode(GL_MODELVIEW);
-  glPopMatrix();
+  // Calculate centered offsets
+  GLfloat x = (SCREEN_WIDTH - gCheckerBoardTexture.textureWidth()) / 2.f;
+  GLfloat y = (SCREEN_HEIGHT - gCheckerBoardTexture.textureHeight()) / 2.f;
 
-  // Save default matrix again
-  glPushMatrix();
-
-  // Move to center of the screen
-  glTranslatef(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f, 0.f);
-
-  // Red quad
-  glBegin(GL_QUADS);
-  glColor3f(1.f, 0.f, 0.f);
-  glVertex2f(-SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f);
-  glVertex2f(SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f);
-  glVertex2f(SCREEN_WIDTH / 4.f, SCREEN_HEIGHT / 4.f);
-  glVertex2f(-SCREEN_WIDTH / 4.f, SCREEN_HEIGHT / 4.f);
-  glEnd();
-
-  // Move to the right of the screen
-  glTranslatef(SCREEN_WIDTH, 0.f, 0.f);
-
-  // Green quad
-  glBegin(GL_QUADS);
-  glColor3f(0.f, 1.f, 0.f);
-  glVertex2f(-SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f);
-  glVertex2f(SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f);
-  glVertex2f(SCREEN_WIDTH / 4.f, SCREEN_HEIGHT / 4.f);
-  glVertex2f(-SCREEN_WIDTH / 4.f, SCREEN_HEIGHT / 4.f);
-  glEnd();
-
-  // Move to the lower right of the screen
-  glTranslatef(0.f, SCREEN_HEIGHT, 0.f);
-
-  // Blue quad
-  glBegin(GL_QUADS);
-  glColor3f(0.f, 0.f, 1.f);
-  glVertex2f(-SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f);
-  glVertex2f(SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f);
-  glVertex2f(SCREEN_WIDTH / 4.f, SCREEN_HEIGHT / 4.f);
-  glVertex2f(-SCREEN_WIDTH / 4.f, SCREEN_HEIGHT / 4.f);
-  glEnd();
-
-  // Move below the screen
-  glTranslatef(-SCREEN_WIDTH, 0.f, 0.f);
-
-  // Yellow quad
-  glBegin(GL_QUADS);
-  glColor3f(1.f, 1.f, 0.f);
-  glVertex2f(-SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f);
-  glVertex2f(SCREEN_WIDTH / 4.f, -SCREEN_HEIGHT / 4.f);
-  glVertex2f(SCREEN_WIDTH / 4.f, SCREEN_HEIGHT / 4.f);
-  glVertex2f(-SCREEN_WIDTH / 4.f, SCREEN_HEIGHT / 4.f);
-  glEnd();
+  // Render checkerboard texture
+  gCheckerBoardTexture.render(x, y);
 
   // Update screen
   glutSwapBuffers();
-}
-
-void handleKeys(unsigned char key, int x, int y) {
-  // If the user pressed w/a/s/d, change camera position
-  if (key == 'w') {
-    gCameraY -= 16.f;
-  } else if (key == 's') {
-    gCameraY += 16.f;
-  } else if (key == 'a') {
-    gCameraX -= 16.f;
-  } else if (key == 'd') {
-    gCameraX += 16.f;
-  }
-  // Take saved matrix off the stack and reset it
-  glMatrixMode(GL_MODELVIEW);
-  glPopMatrix();
-  glLoadIdentity();
-
-  // Move camera to position
-  glTranslatef(-gCameraX, -gCameraY, 0.f);
-
-  // Save default matrix again with camera translation
-  glPushMatrix();
 }
