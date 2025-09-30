@@ -1,9 +1,11 @@
 
 #include "LUtil.h"
 #include "LTexture.h"
+#include <IL/il.h>
+#include <IL/ilu.h>
 
-// Checkerboard texture
-LTexture gCheckerBoardTexture;
+// File loaded texture
+LTexture gLoadedTexture;
 
 bool initGL() {
   // Set the viewport
@@ -31,41 +33,24 @@ bool initGL() {
     return false;
   }
 
+  // Initialize DevIL
+  ilInit();
+  ilClearColour(255, 255, 255, 000);
+
+  // Check for error
+  ILenum ilError = ilGetError();
+  if (ilError != IL_NO_ERROR) {
+    printf("Error initializing DevIL! %s\n", iluErrorString(ilError));
+    return false;
+  }
+
   return true;
 }
 
 bool loadMedia() {
-  // Checkerboard pixels
-  const int CHECKERBOARD_WIDTH = 128;
-  const int CHECKERBOARD_HEIGHT = 128;
-  const int CHECKERBOARD_PIXEL_COUNT = CHECKERBOARD_WIDTH * CHECKERBOARD_HEIGHT;
-  GLuint checkerBoard[CHECKERBOARD_PIXEL_COUNT];
-
-  // Go through pixels
-  for (int i = 0; i < CHECKERBOARD_PIXEL_COUNT; ++i) {
-    // Get the individual color components
-    GLubyte *colors = (GLubyte *)&checkerBoard[i];
-
-    // If the 5th bit of the x and y offsets of the pixel do not match
-    if (i / 128 & 16 ^ i % 128 & 16) {
-      // Set pixel to white
-      colors[0] = 0xFF;
-      colors[1] = 0xFF;
-      colors[2] = 0xFF;
-      colors[3] = 0xFF;
-    } else {
-      // Set pixel to red
-      colors[0] = 0xFF;
-      colors[1] = 0x00;
-      colors[2] = 0x00;
-      colors[3] = 0xFF;
-    }
-  }
-
   // Load texture
-  if (!gCheckerBoardTexture.loadTextureFromPixels32(
-          checkerBoard, CHECKERBOARD_WIDTH, CHECKERBOARD_HEIGHT)) {
-    printf("Unable to load checkerboard texture!\n");
+  if (!gLoadedTexture.loadTextureFromFile("texture.png")) {
+    printf("Unable to load file texture!\n");
     return false;
   }
 
@@ -81,11 +66,11 @@ void render() {
   glClear(GL_COLOR_BUFFER_BIT);
 
   // Calculate centered offsets
-  GLfloat x = (SCREEN_WIDTH - gCheckerBoardTexture.textureWidth()) / 2.f;
-  GLfloat y = (SCREEN_HEIGHT - gCheckerBoardTexture.textureHeight()) / 2.f;
+  GLfloat x = (SCREEN_WIDTH - gLoadedTexture.textureWidth()) / 2.f;
+  GLfloat y = (SCREEN_HEIGHT - gLoadedTexture.textureHeight()) / 2.f;
 
-  // Render checkerboard texture
-  gCheckerBoardTexture.render(x, y);
+  // Render texture
+  gLoadedTexture.render(x, y);
 
   // Update screen
   glutSwapBuffers();
