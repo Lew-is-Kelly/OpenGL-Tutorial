@@ -3,6 +3,15 @@
 #include <IL/il.h>
 #include <IL/ilu.h>
 
+// Stretched texture
+LTexture gStretchedTexture;
+
+// Stretch size
+LFRect gStretchRect = {0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT};
+
+// Texture filtering
+GLenum gFiltering = GL_LINEAR;
+
 // Non-power-of-two texture
 LTexture gCircleTexture;
 bool initGL() {
@@ -53,9 +62,8 @@ bool initGL() {
 
 bool loadMedia() {
   // Load and color key texture
-  if (!gCircleTexture.loadTextureFromFileWithColorKey("circle.png", 000, 255,
-                                                      255)) {
-    printf("Unable to load circle texture!\n");
+  if (!gStretchedTexture.loadTextureFromFile("mini_opengl.png")) {
+    printf("Unable to load mini texture!\n");
     return false;
   }
 
@@ -68,11 +76,33 @@ void render() {
   // Clear color buffer
   glClear(GL_COLOR_BUFFER_BIT);
 
-  // Render Circle
-  glColor4f(1.f, 1.f, 1.f, 0.5f);
-  gCircleTexture.render((SCREEN_WIDTH - gCircleTexture.imageWidth()) / 2.f,
-                        (SCREEN_HEIGHT - gCircleTexture.imageHeight()) / 2.f);
+  // Render texture stretched
+  gStretchedTexture.render(0.f, 0.f, NULL, &gStretchRect);
 
   // Update screen
   glutSwapBuffers();
+}
+
+void handleKeys(unsigned char key, int x, int y) {
+  // If q is pressed
+  if (key == 'q') {
+    // Bind texture for modification
+    glBindTexture(GL_TEXTURE_2D, gStretchedTexture.getTextureID());
+
+    // Toggle linear/nearest filtering
+    if (gFiltering != GL_LINEAR) {
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+      gFiltering = GL_LINEAR;
+    } else {
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+      gFiltering = GL_NEAREST;
+    }
+
+    // Unbind texture
+    glBindTexture(GL_TEXTURE_2D, NULL);
+  }
 }
