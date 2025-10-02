@@ -108,6 +108,47 @@ public:
    -Binds a NULL texture
   */
 
+  bool loadPixelsFromFile(std::string path);
+  /*
+  Pre Condition:
+   -Initialized DevIL
+  Post Condition:
+   -Loads member pixels from the given file
+   -Pads image to have power-of-two dimensions
+   -Reports error to console if pixels could not be loaded
+  Side Effects:
+   -None
+  */
+
+  bool loadTextureFromFileWithColorKey(std::string path, GLubyte r, GLubyte g,
+                                       GLubyte b, GLubyte a = 000);
+  /*
+  Pre Condition:
+   -A valid OpenGL context
+   -Initialized DevIL
+  Post Condition:
+   -Creates a texture from the given file
+   -Pads image to have power-of-two dimensions
+   -Sets given RGBA value to RFFGFFBFFA00 in pixel data
+   -If A = 0, only RGB components are compared
+   -Reports error to console if texture could not be created
+  Side Effects:
+   -Binds a NULL texture
+  */
+
+  bool loadTextureFromPixels32();
+  /*
+  Pre Condition:
+   -A valid OpenGL context
+   -Valid member pixels
+  Post Condition:
+   -Creates a texture from the member pixels
+   -Deletes member pixels on success
+   -Reports error to console if texture could not be created
+  Side Effects:
+   -Binds a NULL texture
+  */
+
   void freeTexture();
   /*
   Pre Condition:

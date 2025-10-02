@@ -5,7 +5,6 @@
 
 // Non-power-of-two texture
 LTexture gCircleTexture;
-
 bool initGL() {
   // Set the viewport
   glViewport(0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -24,6 +23,11 @@ bool initGL() {
 
   // Enable texturing
   glEnable(GL_TEXTURE_2D);
+
+  // Set blending
+  glEnable(GL_BLEND);
+  glDisable(GL_DEPTH_TEST);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   // Check for error
   GLenum error = glGetError();
@@ -48,43 +52,12 @@ bool initGL() {
 }
 
 bool loadMedia() {
-  // Load texture
-  if (!gCircleTexture.loadTextureFromFile("circle.png")) {
+  // Load and color key texture
+  if (!gCircleTexture.loadTextureFromFileWithColorKey("circle.png", 000, 255,
+                                                      255)) {
     printf("Unable to load circle texture!\n");
     return false;
   }
-
-  // Lock texture for modification
-  gCircleTexture.lock();
-  // Calculate target color
-  GLuint targetColor;
-  GLubyte *colors = (GLubyte *)&targetColor;
-  colors[0] = 000;
-  colors[1] = 255;
-  colors[2] = 255;
-  colors[3] = 255;
-
-  // Replace target color with transparent black
-  GLuint *pixels = gCircleTexture.getPixelData32();
-  GLuint pixelCount =
-      gCircleTexture.textureWidth() * gCircleTexture.textureHeight();
-  for (int i = 0; i < pixelCount; ++i) {
-    if (pixels[i] == targetColor) {
-      pixels[i] = 0;
-    }
-  }
-
-  // Diagonal Lines
-  for (int y = 0; y < gCircleTexture.imageHeight(); ++y) {
-    for (int x = 0; x < gCircleTexture.imageWidth(); ++x) {
-      if (y % 10 != x % 10) {
-        gCircleTexture.setPixel32(x, y, 0);
-      }
-    }
-  }
-
-  // Update texture
-  gCircleTexture.unlock();
 
   return true;
 }
@@ -95,7 +68,8 @@ void render() {
   // Clear color buffer
   glClear(GL_COLOR_BUFFER_BIT);
 
-  // Render circle
+  // Render Circle
+  glColor4f(1.f, 1.f, 1.f, 0.5f);
   gCircleTexture.render((SCREEN_WIDTH - gCircleTexture.imageWidth()) / 2.f,
                         (SCREEN_HEIGHT - gCircleTexture.imageHeight()) / 2.f);
 
