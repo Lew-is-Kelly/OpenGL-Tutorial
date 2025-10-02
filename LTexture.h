@@ -10,7 +10,7 @@ class LTexture {
 public:
   LTexture();
   /*
-  Pre Condition
+  Pre Condition:
    -None
   Post Condition:
    -Initializes member variables
@@ -24,6 +24,85 @@ public:
    -None
   Post Condition:
    -Frees texture
+  Side Effects:
+   -None
+  */
+
+  bool loadTextureFromFile(std::string path);
+  /*
+  Pre Condition:
+   -A valid OpenGL context
+   -Initialized DevIL
+  Post Condition:
+   -Creates a texture from the given file
+   -Pads image to have power-of-two dimensions
+   -Reports error to console if texture could not be created
+  Side Effects:
+   -Binds a NULL texture
+  */
+
+  bool loadPixelsFromFile(std::string path);
+  /*
+  Pre Condition:
+   -Initialized DevIL
+  Post Condition:
+   -Loads member pixels from the given file
+   -Pads image to have power-of-two dimensions
+   -Reports error to console if pixels could not be loaded
+  Side Effects:
+   -None
+  */
+
+  bool loadTextureFromFileWithColorKey(std::string path, GLubyte r, GLubyte g,
+                                       GLubyte b, GLubyte a = 000);
+  /*
+  Pre Condition:
+   -A valid OpenGL context
+   -Initialized DevIL
+  Post Condition:
+   -Creates a texture from the given file
+   -Pads image to have power-of-two dimensions
+   -Sets given RGBA value to RFFGFFBFFA00 in pixel data
+   -If A = 0, only RGB components are compared
+   -Reports error to console if texture could not be created
+  Side Effects:
+   -Binds a NULL texture
+  */
+
+  bool loadTextureFromPixels32();
+  /*
+  Pre Condition:
+   -A valid OpenGL context
+   -Valid member pixels
+  Post Condition:
+   -Creates a texture from the member pixels
+   -Deletes member pixels on success
+   -Reports error to console if texture could not be created
+  Side Effects:
+   -Binds a NULL texture
+  */
+
+  bool loadTextureFromPixels32(GLuint *pixels, GLuint imgWidth,
+                               GLuint imgHeight, GLuint texWidth,
+                               GLuint texHeight);
+  /*
+  Pre Condition:
+   -A valid OpenGL context
+  Post Condition:
+   -Creates a texture from the given pixels
+   -Reports error to console if texture could not be created
+  Side Effects:
+   -Binds a NULL texture
+  */
+
+  void freeTexture();
+  /*
+  Pre Condition:
+   -A valid OpenGL context
+  Post Condition:
+   -Deletes texture if it exists
+   -Deletes member pixels if they exist
+   -Sets texture ID to 0
   Side Effects:
    -None
   */
@@ -82,86 +161,8 @@ public:
    -None
   */
 
-  bool loadTextureFromFile(std::string path);
-  /*
-  Pre Condition:
-   -A valid OpenGL context
-   -Initialized DevIL
-  Post Condition:
-   -Creates a texture from the given file
-   -Pads image to have power-of-two dimensions
-   -Reports error to console if texture could not be created
-  Side Effects:
-   -Binds a NULL texture
-  */
-
-  bool loadTextureFromPixels32(GLuint *pixels, GLuint imgWidth,
-                               GLuint imgHeight, GLuint texWidth,
-                               GLuint texHeight);
-  /*
-  Pre Condition:
-   -A valid OpenGL context
-  Post Condition:
-   -Creates a texture from the given pixels
-   -Reports error to console if texture could not be created
-  Side Effects:
-   -Binds a NULL texture
-  */
-
-  bool loadPixelsFromFile(std::string path);
-  /*
-  Pre Condition:
-   -Initialized DevIL
-  Post Condition:
-   -Loads member pixels from the given file
-   -Pads image to have power-of-two dimensions
-   -Reports error to console if pixels could not be loaded
-  Side Effects:
-   -None
-  */
-
-  bool loadTextureFromFileWithColorKey(std::string path, GLubyte r, GLubyte g,
-                                       GLubyte b, GLubyte a = 000);
-  /*
-  Pre Condition:
-   -A valid OpenGL context
-   -Initialized DevIL
-  Post Condition:
-   -Creates a texture from the given file
-   -Pads image to have power-of-two dimensions
-   -Sets given RGBA value to RFFGFFBFFA00 in pixel data
-   -If A = 0, only RGB components are compared
-   -Reports error to console if texture could not be created
-  Side Effects:
-   -Binds a NULL texture
-  */
-
-  bool loadTextureFromPixels32();
-  /*
-  Pre Condition:
-   -A valid OpenGL context
-   -Valid member pixels
-  Post Condition:
-   -Creates a texture from the member pixels
-   -Deletes member pixels on success
-   -Reports error to console if texture could not be created
-  Side Effects:
-   -Binds a NULL texture
-  */
-
-  void freeTexture();
-  /*
-  Pre Condition:
-   -A valid OpenGL context
-  Post Condition:
-   -Deletes texture if it exists
-   -Sets texture ID to 0
-  Side Effects:
-   -None
-  */
-
-  void render(GLfloat x, GLfloat y, LFRect *clip = NULL,
-              LFRect *stretch = NULL);
+  void render(GLfloat x, GLfloat y, LFRect *clip = NULL, LFRect *stretch = NULL,
+              GLfloat degrees = 0.f);
   /*
   Pre Condition:
    -A valid OpenGL context
@@ -170,6 +171,7 @@ public:
    -Translates to given position and renders the texture area mapped to a quad
    -If given texture clip is NULL, the full image is rendered
    -If a stretch area is given, texture area is scaled to the stretch area size
+   -Rotates quad around its post translation center
   Side Effects:
    -Binds member texture ID
   */
