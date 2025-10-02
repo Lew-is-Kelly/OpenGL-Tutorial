@@ -15,7 +15,11 @@ Pre Condition:
  -A valid OpenGL context
 Post Condition:
  -Initializes viewport, matrices, and clear color
+ -Enables blending
+ -Disables depth testing
+ -Initializes DevIL and DevIL utilities
  -Reports to console if there was an OpenGL error
+ -Reports to console if there was a DevIL error
  -Returns false if there was an error in initialization
 Side Effects:
  -Sets viewport to the fill rendering area
@@ -24,6 +28,7 @@ Side Effects:
  -Matrix mode is set to modelview
  -Clear color is set to black
  -Texturing is enabled
+ -Sets DevIL clear color to transparent white
 */
 
 bool loadMedia();

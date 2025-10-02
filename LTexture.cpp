@@ -4,7 +4,7 @@
 #include <cstring>
 
 LTexture::LTexture() {
-  // Initialize texture ID
+  // Initialize texture ID and pixels
   mTextureID = 0;
   mPixels = NULL;
 
@@ -73,46 +73,6 @@ bool LTexture::loadTextureFromFile(std::string path) {
   return textureLoaded;
 }
 
-bool LTexture::loadTextureFromPixels32(GLuint *pixels, GLuint imgWidth,
-                                       GLuint imgHeight, GLuint texWidth,
-                                       GLuint texHeight) {
-  // Free texture if it exists
-  freeTexture();
-
-  // Get image dimensions
-  mImageWidth = imgWidth;
-  mImageHeight = imgHeight;
-  mTextureWidth = texWidth;
-  mTextureHeight = texHeight;
-
-  // Generate texture ID
-  glGenTextures(1, &mTextureID);
-
-  // Bind texture ID
-  glBindTexture(GL_TEXTURE_2D, mTextureID);
-
-  // Generate texture
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mTextureWidth, mTextureHeight, 0,
-               GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-
-  // Set texture parameters
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-  // Unbind texture
-  glBindTexture(GL_TEXTURE_2D, NULL);
-
-  // Check for error
-  GLenum error = glGetError();
-  if (error != GL_NO_ERROR) {
-    printf("Error loading texture from %p pixels! %s\n", pixels,
-           gluErrorString(error));
-    return false;
-  }
-
-  return true;
-}
-
 bool LTexture::loadPixelsFromFile(std::string path) {
   // Deallocate texture data
   freeTexture();
@@ -149,6 +109,7 @@ bool LTexture::loadPixelsFromFile(std::string path) {
         // Resize image
         iluEnlargeCanvas((int)texWidth, (int)texHeight, 1);
       }
+
       // Allocate memory for texture data
       GLuint size = texWidth * texHeight;
       mPixels = new GLuint[size];
@@ -174,6 +135,35 @@ bool LTexture::loadPixelsFromFile(std::string path) {
   }
 
   return pixelsLoaded;
+}
+
+bool LTexture::loadTextureFromFileWithColorKey(std::string path, GLubyte r,
+                                               GLubyte g, GLubyte b,
+                                               GLubyte a) {
+  // Load pixels
+  if (!loadPixelsFromFile(path)) {
+    return false;
+  }
+
+  // Go through pixels
+  GLuint size = mTextureWidth * mTextureHeight;
+  for (int i = 0; i < size; ++i) {
+    // Get pixel colors
+    GLubyte *colors = (GLubyte *)&mPixels[i];
+
+    // Color matches
+    if (colors[0] == r && colors[1] == g && colors[2] == b &&
+        (0 == a || colors[3] == a)) {
+      // Make transparent
+      colors[0] = 255;
+      colors[1] = 255;
+      colors[2] = 255;
+      colors[3] = 000;
+    }
+  }
+
+  // Create texture
+  return loadTextureFromPixels32();
 }
 
 bool LTexture::loadTextureFromPixels32() {
@@ -230,33 +220,44 @@ bool LTexture::loadTextureFromPixels32() {
   return success;
 }
 
-bool LTexture::loadTextureFromFileWithColorKey(std::string path, GLubyte r,
-                                               GLubyte g, GLubyte b,
-                                               GLubyte a) {
-  // Load pixels
-  if (!loadPixelsFromFile(path)) {
+bool LTexture::loadTextureFromPixels32(GLuint *pixels, GLuint imgWidth,
+                                       GLuint imgHeight, GLuint texWidth,
+                                       GLuint texHeight) {
+  // Free texture if it exists
+  freeTexture();
+
+  // Get image dimensions
+  mImageWidth = imgWidth;
+  mImageHeight = imgHeight;
+  mTextureWidth = texWidth;
+  mTextureHeight = texHeight;
+
+  // Generate texture ID
+  glGenTextures(1, &mTextureID);
+
+  // Bind texture ID
+  glBindTexture(GL_TEXTURE_2D, mTextureID);
+
+  // Generate texture
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mTextureWidth, mTextureHeight, 0,
+               GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+
+  // Set texture parameters
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+  // Unbind texture
+  glBindTexture(GL_TEXTURE_2D, NULL);
+
+  // Check for error
+  GLenum error = glGetError();
+  if (error != GL_NO_ERROR) {
+    printf("Error loading texture from %p pixels! %s\n", pixels,
+           gluErrorString(error));
     return false;
   }
 
-  // Go through pixels
-  GLuint size = mTextureWidth * mTextureHeight;
-  for (int i = 0; i < size; ++i) {
-    // Get pixel colors
-    GLubyte *colors = (GLubyte *)&mPixels[i];
-
-    // Color matches
-    if (colors[0] == r && colors[1] == g && colors[2] == b &&
-        (0 == a || colors[3] == a)) {
-      // Make transparent
-      colors[0] = 255;
-      colors[1] = 255;
-      colors[2] = 255;
-      colors[3] = 000;
-    }
-  }
-
-  // Create texture
-  return loadTextureFromPixels32();
+  return true;
 }
 
 void LTexture::freeTexture() {
@@ -333,7 +334,8 @@ void LTexture::setPixel32(GLuint x, GLuint y, GLuint pixel) {
   mPixels[y * mTextureWidth + x] = pixel;
 }
 
-void LTexture::render(GLfloat x, GLfloat y, LFRect *clip, LFRect *stretch) {
+void LTexture::render(GLfloat x, GLfloat y, LFRect *clip, LFRect *stretch,
+                      GLfloat degrees) {
   // If the texture exists
   if (mTextureID != 0) {
     // Remove any previous transformations
@@ -361,6 +363,7 @@ void LTexture::render(GLfloat x, GLfloat y, LFRect *clip, LFRect *stretch) {
       quadWidth = clip->w;
       quadHeight = clip->h;
     }
+
     // Handle Stretching
     if (stretch != NULL) {
       quadWidth = stretch->w;
@@ -368,7 +371,10 @@ void LTexture::render(GLfloat x, GLfloat y, LFRect *clip, LFRect *stretch) {
     }
 
     // Move to rendering point
-    glTranslatef(x, y, 0.f);
+    glTranslatef(x + quadWidth / 2.f, y + quadHeight / 2.f, 0.f);
+
+    // Rotate around rendering point
+    glRotatef(degrees, 0.f, 0.f, 1.f);
 
     // Set texture ID
     glBindTexture(GL_TEXTURE_2D, mTextureID);
@@ -376,13 +382,13 @@ void LTexture::render(GLfloat x, GLfloat y, LFRect *clip, LFRect *stretch) {
     // Render textured quad
     glBegin(GL_QUADS);
     glTexCoord2f(texLeft, texTop);
-    glVertex2f(0.f, 0.f);
+    glVertex2f(-quadWidth / 2.f, -quadHeight / 2.f);
     glTexCoord2f(texRight, texTop);
-    glVertex2f(quadWidth, 0.f);
+    glVertex2f(quadWidth / 2.f, -quadHeight / 2.f);
     glTexCoord2f(texRight, texBottom);
-    glVertex2f(quadWidth, quadHeight);
+    glVertex2f(quadWidth / 2.f, quadHeight / 2.f);
     glTexCoord2f(texLeft, texBottom);
-    glVertex2f(0.f, quadHeight);
+    glVertex2f(-quadWidth / 2.f, quadHeight / 2.f);
     glEnd();
   }
 }
