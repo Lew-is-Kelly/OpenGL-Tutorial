@@ -333,7 +333,7 @@ void LTexture::setPixel32(GLuint x, GLuint y, GLuint pixel) {
   mPixels[y * mTextureWidth + x] = pixel;
 }
 
-void LTexture::render(GLfloat x, GLfloat y, LFRect *clip) {
+void LTexture::render(GLfloat x, GLfloat y, LFRect *clip, LFRect *stretch) {
   // If the texture exists
   if (mTextureID != 0) {
     // Remove any previous transformations
@@ -360,6 +360,11 @@ void LTexture::render(GLfloat x, GLfloat y, LFRect *clip) {
       // Vertex coordinates
       quadWidth = clip->w;
       quadHeight = clip->h;
+    }
+    // Handle Stretching
+    if (stretch != NULL) {
+      quadWidth = stretch->w;
+      quadHeight = stretch->h;
     }
 
     // Move to rendering point
