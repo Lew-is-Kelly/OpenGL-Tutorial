@@ -3,12 +3,17 @@
 #include <IL/il.h>
 #include <IL/ilu.h>
 
-// Arrow texture
-LTexture gRotatingTexture;
+// Stretched texture
+LTexture gStretchedTexture;
 
-// Rotation angle
-GLfloat gAngle = 0.f;
+// Stretch size
+LFRect gStretchRect = {0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT};
 
+// Texture filtering
+GLenum gFiltering = GL_LINEAR;
+
+// Non-power-of-two texture
+LTexture gCircleTexture;
 bool initGL() {
   // Set the viewport
   glViewport(0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -56,35 +61,48 @@ bool initGL() {
 }
 
 bool loadMedia() {
-  // Load texture
-  if (!gRotatingTexture.loadTextureFromFile("arrow.png")) {
-    printf("Unable to load arrow texture!\n");
+  // Load and color key texture
+  if (!gStretchedTexture.loadTextureFromFile("mini_opengl.png")) {
+    printf("Unable to load mini texture!\n");
     return false;
   }
 
   return true;
 }
 
-void update() {
-  // Rotate
-  gAngle += 360.f / SCREEN_FPS;
-
-  // Cap angle
-  if (gAngle > 360.f) {
-    gAngle -= 360.f;
-  }
-}
+void update() {}
 
 void render() {
   // Clear color buffer
   glClear(GL_COLOR_BUFFER_BIT);
 
-  // Render arrow
-  gRotatingTexture.render((SCREEN_WIDTH - gRotatingTexture.imageWidth()) / 2.f,
-                          (SCREEN_HEIGHT - gRotatingTexture.imageHeight()) /
-                              2.f,
-                          NULL, NULL, gAngle);
+  // Render texture stretched
+  gStretchedTexture.render(0.f, 0.f, NULL, &gStretchRect);
 
   // Update screen
   glutSwapBuffers();
+}
+
+void handleKeys(unsigned char key, int x, int y) {
+  // If q is pressed
+  if (key == 'q') {
+    // Bind texture for modification
+    glBindTexture(GL_TEXTURE_2D, gStretchedTexture.getTextureID());
+
+    // Toggle linear/nearest filtering
+    if (gFiltering != GL_LINEAR) {
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+      gFiltering = GL_LINEAR;
+    } else {
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+      gFiltering = GL_NEAREST;
+    }
+
+    // Unbind texture
+    glBindTexture(GL_TEXTURE_2D, NULL);
+  }
 }
