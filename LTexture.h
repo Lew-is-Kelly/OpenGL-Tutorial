@@ -161,8 +161,7 @@ public:
    -None
   */
 
-  void render(GLfloat x, GLfloat y, LFRect *clip = NULL, LFRect *stretch = NULL,
-              GLfloat degrees = 0.f);
+  void render(GLfloat x, GLfloat y, LFRect *clip = NULL);
   /*
   Pre Condition:
    -A valid OpenGL context
@@ -170,8 +169,6 @@ public:
   Post Condition:
    -Translates to given position and renders the texture area mapped to a quad
    -If given texture clip is NULL, the full image is rendered
-   -If a stretch area is given, texture area is scaled to the stretch area size
-   -Rotates quad around its post translation center
   Side Effects:
    -Binds member texture ID
   */
