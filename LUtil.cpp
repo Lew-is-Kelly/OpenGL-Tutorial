@@ -3,11 +3,14 @@
 #include <IL/il.h>
 #include <IL/ilu.h>
 
-// Arrow texture
+// OpenGL texture
 LTexture gRotatingTexture;
 
-// Rotation angle
+// Rotation Angle
 GLfloat gAngle = 0.f;
+
+// Transformation state
+int gTransformationCombo = 0;
 
 bool initGL() {
   // Set the viewport
@@ -57,14 +60,13 @@ bool initGL() {
 
 bool loadMedia() {
   // Load texture
-  if (!gRotatingTexture.loadTextureFromFile("arrow.png")) {
-    printf("Unable to load arrow texture!\n");
+  if (!gRotatingTexture.loadTextureFromFile("texture.png")) {
+    printf("Unable to load OpenGL texture!\n");
     return false;
   }
 
   return true;
 }
-
 void update() {
   // Rotate
   gAngle += 360.f / SCREEN_FPS;
@@ -79,12 +81,67 @@ void render() {
   // Clear color buffer
   glClear(GL_COLOR_BUFFER_BIT);
 
-  // Render arrow
-  gRotatingTexture.render((SCREEN_WIDTH - gRotatingTexture.imageWidth()) / 2.f,
-                          (SCREEN_HEIGHT - gRotatingTexture.imageHeight()) /
-                              2.f,
-                          NULL, NULL, gAngle);
+  // Reset transformation
+  glLoadIdentity();
+
+  // Render current scene transformation
+  switch (gTransformationCombo) {
+  case 0:
+    glTranslatef(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f, 0.f);
+    glRotatef(gAngle, 0.f, 0.f, 1.f);
+    glScalef(2.f, 2.f, 0.f);
+    glTranslatef(gRotatingTexture.imageWidth() / -2.f,
+                 gRotatingTexture.imageHeight() / -2.f, 0.f);
+    break;
+
+  case 1:
+    glTranslatef(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f, 0.f);
+    glRotatef(gAngle, 0.f, 0.f, 1.f);
+    glTranslatef(gRotatingTexture.imageWidth() / -2.f,
+                 gRotatingTexture.imageHeight() / -2.f, 0.f);
+    glScalef(2.f, 2.f, 0.f);
+    break;
+
+  case 2:
+    glScalef(2.f, 2.f, 0.f);
+    glTranslatef(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f, 0.f);
+    glRotatef(gAngle, 0.f, 0.f, 1.f);
+    glTranslatef(gRotatingTexture.imageWidth() / -2.f,
+                 gRotatingTexture.imageHeight() / -2.f, 0.f);
+    break;
+
+  case 3:
+    glTranslatef(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f, 0.f);
+    glRotatef(gAngle, 0.f, 0.f, 1.f);
+    glScalef(2.f, 2.f, 0.f);
+    break;
+
+  case 4:
+    glRotatef(gAngle, 0.f, 0.f, 1.f);
+    glTranslatef(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f, 0.f);
+    glScalef(2.f, 2.f, 0.f);
+    glTranslatef(gRotatingTexture.imageWidth() / -2.f,
+                 gRotatingTexture.imageHeight() / -2.f, 0.f);
+    break;
+  }
+
+  // Render texture
+  gRotatingTexture.render(0.f, 0.f);
 
   // Update screen
   glutSwapBuffers();
+}
+
+void handleKeys(unsigned char key, int x, int y) {
+  // If q is pressed
+  if (key == 'q') {
+    // Reset rotation
+    gAngle = 0.f;
+
+    // Cycle through combinations
+    gTransformationCombo++;
+    if (gTransformationCombo > 4) {
+      gTransformationCombo = 0;
+    }
+  }
 }

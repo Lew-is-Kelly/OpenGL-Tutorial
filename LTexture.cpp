@@ -334,13 +334,9 @@ void LTexture::setPixel32(GLuint x, GLuint y, GLuint pixel) {
   mPixels[y * mTextureWidth + x] = pixel;
 }
 
-void LTexture::render(GLfloat x, GLfloat y, LFRect *clip, LFRect *stretch,
-                      GLfloat degrees) {
+void LTexture::render(GLfloat x, GLfloat y, LFRect *clip) {
   // If the texture exists
   if (mTextureID != 0) {
-    // Remove any previous transformations
-    glLoadIdentity();
-
     // Texture coordinates
     GLfloat texTop = 0.f;
     GLfloat texBottom = (GLfloat)mImageHeight / (GLfloat)mTextureHeight;
@@ -364,17 +360,8 @@ void LTexture::render(GLfloat x, GLfloat y, LFRect *clip, LFRect *stretch,
       quadHeight = clip->h;
     }
 
-    // Handle Stretching
-    if (stretch != NULL) {
-      quadWidth = stretch->w;
-      quadHeight = stretch->h;
-    }
-
     // Move to rendering point
-    glTranslatef(x + quadWidth / 2.f, y + quadHeight / 2.f, 0.f);
-
-    // Rotate around rendering point
-    glRotatef(degrees, 0.f, 0.f, 1.f);
+    glTranslatef(x, y, 0.f);
 
     // Set texture ID
     glBindTexture(GL_TEXTURE_2D, mTextureID);
@@ -382,13 +369,13 @@ void LTexture::render(GLfloat x, GLfloat y, LFRect *clip, LFRect *stretch,
     // Render textured quad
     glBegin(GL_QUADS);
     glTexCoord2f(texLeft, texTop);
-    glVertex2f(-quadWidth / 2.f, -quadHeight / 2.f);
+    glVertex2f(0.f, 0.f);
     glTexCoord2f(texRight, texTop);
-    glVertex2f(quadWidth / 2.f, -quadHeight / 2.f);
+    glVertex2f(quadWidth, 0.f);
     glTexCoord2f(texRight, texBottom);
-    glVertex2f(quadWidth / 2.f, quadHeight / 2.f);
+    glVertex2f(quadWidth, quadHeight);
     glTexCoord2f(texLeft, texBottom);
-    glVertex2f(-quadWidth / 2.f, quadHeight / 2.f);
+    glVertex2f(0.f, quadHeight);
     glEnd();
   }
 }
