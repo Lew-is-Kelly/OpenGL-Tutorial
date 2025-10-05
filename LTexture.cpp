@@ -3,6 +3,8 @@
 #include <IL/ilu.h>
 #include <cstring>
 
+GLenum DEFAULT_TEXTURE_WRAP = GL_REPEAT;
+
 LTexture::LTexture() {
   // Initialize texture ID and pixels
   mTextureID = 0;
@@ -187,7 +189,7 @@ bool LTexture::loadTextureFromPixels32() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
     // Unbind texture
-    glBindTexture(GL_TEXTURE_2D, NULL);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     // Check for error
     GLenum error = glGetError();
@@ -245,9 +247,11 @@ bool LTexture::loadTextureFromPixels32(GLuint *pixels, GLuint imgWidth,
   // Set texture parameters
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, DEFAULT_TEXTURE_WRAP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, DEFAULT_TEXTURE_WRAP);
 
   // Unbind texture
-  glBindTexture(GL_TEXTURE_2D, NULL);
+  glBindTexture(GL_TEXTURE_2D, 0);
 
   // Check for error
   GLenum error = glGetError();
@@ -293,7 +297,7 @@ bool LTexture::lock() {
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, mPixels);
 
     // Unbind texture
-    glBindTexture(GL_TEXTURE_2D, NULL);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     return true;
   }

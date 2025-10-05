@@ -3,11 +3,14 @@
 #include <IL/il.h>
 #include <IL/ilu.h>
 
-// OpenGL texture
-LTexture gRotatingTexture;
+// Repeating image
+LTexture gRepeatingTexture;
 
-// Rotation Angle
-GLfloat gAngle = 0.f;
+// Texture offset
+GLfloat gTexX = 0.f, gTexY = 0.f;
+
+// Texture wrap type
+int gTextureWrapType = 0;
 
 // Transformation state
 int gTransformationCombo = 0;
@@ -60,7 +63,7 @@ bool initGL() {
 
 bool loadMedia() {
   // Load texture
-  if (!gRotatingTexture.loadTextureFromFile("texture.png")) {
+  if (!gRepeatingTexture.loadTextureFromFile("texture.png")) {
     printf("Unable to load OpenGL texture!\n");
     return false;
   }
@@ -68,12 +71,16 @@ bool loadMedia() {
   return true;
 }
 void update() {
-  // Rotate
-  gAngle += 360.f / SCREEN_FPS;
+  // Scroll texrture
+  gTexX++;
+  gTexY++;
 
-  // Cap angle
-  if (gAngle > 360.f) {
-    gAngle -= 360.f;
+  // Cap scrolling
+  if (gTexX >= gRepeatingTexture.textureWidth()) {
+    gTexX = 0.f;
+  }
+  if (gTexY >= gRepeatingTexture.textureHeight()) {
+    gTexY = 0.f;
   }
 }
 
@@ -81,52 +88,36 @@ void render() {
   // Clear color buffer
   glClear(GL_COLOR_BUFFER_BIT);
 
+  // Calculate texture maxima
+  GLfloat textureRight =
+      (GLfloat)SCREEN_WIDTH / (GLfloat)gRepeatingTexture.textureWidth();
+  GLfloat textureBottom =
+      (GLfloat)SCREEN_HEIGHT / (GLfloat)gRepeatingTexture.textureHeight();
+
+  // Use repeating texture
+  glBindTexture(GL_TEXTURE_2D, gRepeatingTexture.getTextureID());
+
+  // Switch to textutre matrix
+  glMatrixMode(GL_TEXTURE);
+
   // Reset transformation
   glLoadIdentity();
 
-  // Render current scene transformation
-  switch (gTransformationCombo) {
-  case 0:
-    glTranslatef(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f, 0.f);
-    glRotatef(gAngle, 0.f, 0.f, 1.f);
-    glScalef(2.f, 2.f, 0.f);
-    glTranslatef(gRotatingTexture.imageWidth() / -2.f,
-                 gRotatingTexture.imageHeight() / -2.f, 0.f);
-    break;
+  // Scroll texture
+  glTranslatef(gTexX / gRepeatingTexture.textureWidth(),
+               gTexY / gRepeatingTexture.textureHeight(), 0.f);
 
-  case 1:
-    glTranslatef(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f, 0.f);
-    glRotatef(gAngle, 0.f, 0.f, 1.f);
-    glTranslatef(gRotatingTexture.imageWidth() / -2.f,
-                 gRotatingTexture.imageHeight() / -2.f, 0.f);
-    glScalef(2.f, 2.f, 0.f);
-    break;
-
-  case 2:
-    glScalef(2.f, 2.f, 0.f);
-    glTranslatef(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f, 0.f);
-    glRotatef(gAngle, 0.f, 0.f, 1.f);
-    glTranslatef(gRotatingTexture.imageWidth() / -2.f,
-                 gRotatingTexture.imageHeight() / -2.f, 0.f);
-    break;
-
-  case 3:
-    glTranslatef(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f, 0.f);
-    glRotatef(gAngle, 0.f, 0.f, 1.f);
-    glScalef(2.f, 2.f, 0.f);
-    break;
-
-  case 4:
-    glRotatef(gAngle, 0.f, 0.f, 1.f);
-    glTranslatef(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f, 0.f);
-    glScalef(2.f, 2.f, 0.f);
-    glTranslatef(gRotatingTexture.imageWidth() / -2.f,
-                 gRotatingTexture.imageHeight() / -2.f, 0.f);
-    break;
-  }
-
-  // Render texture
-  gRotatingTexture.render(0.f, 0.f);
+  // Render
+  glBegin(GL_QUADS);
+  glTexCoord2f(0.f, 0.f);
+  glVertex2f(0.f, 0.f);
+  glTexCoord2f(textureRight, 0.f);
+  glVertex2f(SCREEN_WIDTH, 0.f);
+  glTexCoord2f(textureRight, textureBottom);
+  glVertex2f(SCREEN_WIDTH, SCREEN_HEIGHT);
+  glTexCoord2f(0.f, textureBottom);
+  glVertex2f(0.f, SCREEN_HEIGHT);
+  glEnd();
 
   // Update screen
   glutSwapBuffers();
@@ -135,13 +126,29 @@ void render() {
 void handleKeys(unsigned char key, int x, int y) {
   // If q is pressed
   if (key == 'q') {
-    // Reset rotation
-    gAngle = 0.f;
+    // Cycle through texture reptetitions
+    gTextureWrapType++;
+    if (gTextureWrapType >= 2) {
+      gTextureWrapType = 0;
+    }
 
-    // Cycle through combinations
-    gTransformationCombo++;
-    if (gTransformationCombo > 4) {
-      gTransformationCombo = 0;
+    // Set texture repetition
+    glBindTexture(GL_TEXTURE_2D, gRepeatingTexture.getTextureID());
+    switch (gTextureWrapType) {
+    case 0:
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+      printf("%d: GL_REPEAT\n", gTextureWrapType);
+      break;
+
+    case 1:
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+      printf("%d: GL_CLAMP\n", gTextureWrapType);
+      break;
+
+    default:
+      break;
     }
   }
 }

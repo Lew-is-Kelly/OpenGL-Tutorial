@@ -362,4 +362,11 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
+# Demo solutions from LazyFoo
 Solutions/
+
+# Code stuff
+.vscode/
+
+# Sonar Qube
+compile_commands.json
