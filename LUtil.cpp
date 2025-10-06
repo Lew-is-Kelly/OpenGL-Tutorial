@@ -1,22 +1,9 @@
 #include "LUtil.h"
-#include "LVertexPos2D.h"
+#include "LTexture.h"
 #include <IL/il.h>
 #include <IL/ilu.h>
 
-// Quad verticies
-LVertexPos2D gQuadVertices[4];
-
-// Vertex Indices
-GLuint gIndices[4];
-
-// Vertex buffer
-GLuint gVertexBuffer = 0;
-
-// Index buffer
-GLuint gIndexBuffer = 0;
-
-// Texture wrap type
-int gTextureWrapType = 0;
+LTexture gVBOTexture;
 
 bool initGL() {
   // Initialize GLEW
@@ -78,36 +65,10 @@ bool initGL() {
 }
 
 bool loadMedia() {
-  // Set quad verticies
-  gQuadVertices[0].x = SCREEN_WIDTH * 1.f / 4.f;
-  gQuadVertices[0].y = SCREEN_HEIGHT * 1.f / 4.f;
-
-  gQuadVertices[1].x = SCREEN_WIDTH * 3.f / 4.f;
-  gQuadVertices[1].y = SCREEN_HEIGHT * 1.f / 4.f;
-
-  gQuadVertices[2].x = SCREEN_WIDTH * 3.f / 4.f;
-  gQuadVertices[2].y = SCREEN_HEIGHT * 3.f / 4.f;
-
-  gQuadVertices[3].x = SCREEN_WIDTH * 1.f / 4.f;
-  gQuadVertices[3].y = SCREEN_HEIGHT * 3.f / 4.f;
-
-  // Set rendering indices
-  gIndices[0] = 0;
-  gIndices[1] = 1;
-  gIndices[2] = 2;
-  gIndices[3] = 3;
-
-  // Create VBO
-  glGenBuffers(1, &gVertexBuffer);
-  glBindBuffer(GL_ARRAY_BUFFER, gVertexBuffer);
-  glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(LVertexPos2D), gQuadVertices,
-               GL_STATIC_DRAW);
-
-  // Create IBO
-  glGenBuffers(1, &gIndexBuffer);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIndexBuffer);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * sizeof(GLuint), gIndices,
-               GL_STATIC_DRAW);
+  if (!gVBOTexture.loadTextureFromFile("opengl.png")) {
+    printf("Unable to load OpenGL texture!\n");
+    return false;
+  }
 
   return true;
 }
@@ -118,19 +79,12 @@ void render() {
   // Clear color buffer
   glClear(GL_COLOR_BUFFER_BIT);
 
-  // Enable vertex arrays
-  glEnableClientState(GL_VERTEX_ARRAY);
+  // Initialize modelview matrix
+  glLoadIdentity();
 
-  // Set vertex data
-  glBindBuffer(GL_ARRAY_BUFFER, gVertexBuffer);
-  glVertexPointer(2, GL_FLOAT, 0, nullptr);
-
-  // Draw quad using vertex data and index data
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIndexBuffer);
-  glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, nullptr);
-
-  // Disable vertex arrays
-  glDisableClientState(GL_VERTEX_ARRAY);
+  // Render textured quad using VBOs
+  gVBOTexture.render((SCREEN_WIDTH - gVBOTexture.imageWidth()) / 2.f,
+                     (SCREEN_HEIGHT - gVBOTexture.imageHeight()) / 2.f);
 
   // Update screen
   glutSwapBuffers();

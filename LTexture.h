@@ -233,6 +233,27 @@ private:
    -None
   */
 
+  void initVBO();
+  /*
+  Pre Condition:
+   -A valid OpenGL context
+   -A loaded member texture
+  Post Condition:
+   -Generates VBO and IBO to use for rendering
+  Side Effects:
+   -Binds NULL VBO and IBO
+  */
+
+  void freeVBO();
+  /*
+  Pre Condition:
+   -A generated VBO
+  Post Condition:
+   -Frees VBO and IBO
+  Side Effects:
+   -None
+  */
+
   // Texture name
   GLuint mTextureID;
 
@@ -246,6 +267,10 @@ private:
   // Unpadded image dimensions
   GLuint mImageWidth;
   GLuint mImageHeight;
+
+  // VBO IDs
+  GLuint mVBOID;
+  GLuint mIBOID;
 };
 
 #endif
