@@ -6,8 +6,14 @@
 // Quad verticies
 LVertexPos2D gQuadVertices[4];
 
-// Texture offset
-GLfloat gTexX = 0.f, gTexY = 0.f;
+// Vertex Indices
+GLuint gIndices[4];
+
+// Vertex buffer
+GLuint gVertexBuffer = 0;
+
+// Index buffer
+GLuint gIndexBuffer = 0;
 
 // Texture wrap type
 int gTextureWrapType = 0;
@@ -85,6 +91,24 @@ bool loadMedia() {
   gQuadVertices[3].x = SCREEN_WIDTH * 1.f / 4.f;
   gQuadVertices[3].y = SCREEN_HEIGHT * 3.f / 4.f;
 
+  // Set rendering indices
+  gIndices[0] = 0;
+  gIndices[1] = 1;
+  gIndices[2] = 2;
+  gIndices[3] = 3;
+
+  // Create VBO
+  glGenBuffers(1, &gVertexBuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, gVertexBuffer);
+  glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(LVertexPos2D), gQuadVertices,
+               GL_STATIC_DRAW);
+
+  // Create IBO
+  glGenBuffers(1, &gIndexBuffer);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIndexBuffer);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * sizeof(GLuint), gIndices,
+               GL_STATIC_DRAW);
+
   return true;
 }
 
@@ -98,9 +122,12 @@ void render() {
   glEnableClientState(GL_VERTEX_ARRAY);
 
   // Set vertex data
-  glVertexPointer(2, GL_FLOAT, 0, gQuadVertices);
-  // Draw quad using vertex data
-  glDrawArrays(GL_QUADS, 0, 4);
+  glBindBuffer(GL_ARRAY_BUFFER, gVertexBuffer);
+  glVertexPointer(2, GL_FLOAT, 0, nullptr);
+
+  // Draw quad using vertex data and index data
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIndexBuffer);
+  glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, nullptr);
 
   // Disable vertex arrays
   glDisableClientState(GL_VERTEX_ARRAY);
