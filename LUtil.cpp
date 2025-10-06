@@ -1,10 +1,10 @@
 #include "LUtil.h"
-#include "LTexture.h"
+#include "LVertexPos2D.h"
 #include <IL/il.h>
 #include <IL/ilu.h>
 
-// Repeating image
-LTexture gRepeatingTexture;
+// Quad verticies
+LVertexPos2D gQuadVertices[4];
 
 // Texture offset
 GLfloat gTexX = 0.f, gTexY = 0.f;
@@ -72,112 +72,39 @@ bool initGL() {
 }
 
 bool loadMedia() {
-  // Load texture
-  if (!gRepeatingTexture.loadTextureFromFile("texture.png")) {
-    printf("Unable to load repeating texture!\n");
-    return false;
-  }
+  // Set quad verticies
+  gQuadVertices[0].x = SCREEN_WIDTH * 1.f / 4.f;
+  gQuadVertices[0].y = SCREEN_HEIGHT * 1.f / 4.f;
+
+  gQuadVertices[1].x = SCREEN_WIDTH * 3.f / 4.f;
+  gQuadVertices[1].y = SCREEN_HEIGHT * 1.f / 4.f;
+
+  gQuadVertices[2].x = SCREEN_WIDTH * 3.f / 4.f;
+  gQuadVertices[2].y = SCREEN_HEIGHT * 3.f / 4.f;
+
+  gQuadVertices[3].x = SCREEN_WIDTH * 1.f / 4.f;
+  gQuadVertices[3].y = SCREEN_HEIGHT * 3.f / 4.f;
 
   return true;
 }
 
-void update() {
-  // Scroll texture
-  gTexX++;
-  gTexY++;
-
-  // Cap scrolling
-  if (gTexX >= gRepeatingTexture.textureWidth()) {
-    gTexX = 0.f;
-  }
-  if (gTexY >= gRepeatingTexture.textureHeight()) {
-    gTexY = 0.f;
-  }
-}
+void update() {}
 
 void render() {
   // Clear color buffer
   glClear(GL_COLOR_BUFFER_BIT);
 
-  // Calculate texture maxima
-  GLfloat textureRight =
-      (GLfloat)SCREEN_WIDTH / (GLfloat)gRepeatingTexture.textureWidth();
-  GLfloat textureBottom =
-      (GLfloat)SCREEN_HEIGHT / (GLfloat)gRepeatingTexture.textureHeight();
+  // Enable vertex arrays
+  glEnableClientState(GL_VERTEX_ARRAY);
 
-  // Use repeating texture
-  glBindTexture(GL_TEXTURE_2D, gRepeatingTexture.getTextureID());
+  // Set vertex data
+  glVertexPointer(2, GL_FLOAT, 0, gQuadVertices);
+  // Draw quad using vertex data
+  glDrawArrays(GL_QUADS, 0, 4);
 
-  // Switch to texture matrix
-  glMatrixMode(GL_TEXTURE);
-
-  // Reset transformation
-  glLoadIdentity();
-
-  // Scroll texture
-  glTranslatef(gTexX / gRepeatingTexture.textureWidth(),
-               gTexY / gRepeatingTexture.textureHeight(), 0.f);
-
-  // Render
-  glBegin(GL_QUADS);
-  glTexCoord2f(0.f, 0.f);
-  glVertex2f(0.f, 0.f);
-  glTexCoord2f(textureRight, 0.f);
-  glVertex2f(SCREEN_WIDTH, 0.f);
-  glTexCoord2f(textureRight, textureBottom);
-  glVertex2f(SCREEN_WIDTH, SCREEN_HEIGHT);
-  glTexCoord2f(0.f, textureBottom);
-  glVertex2f(0.f, SCREEN_HEIGHT);
-  glEnd();
+  // Disable vertex arrays
+  glDisableClientState(GL_VERTEX_ARRAY);
 
   // Update screen
   glutSwapBuffers();
-}
-
-void handleKeys(unsigned char key, int x, int y) {
-  // If q is pressed
-  if (key == 'q') {
-    // Cycle through texture wraps
-    gTextureWrapType++;
-    if (gTextureWrapType >= 5) {
-      gTextureWrapType = 0;
-    }
-
-    // Set texture repetition
-    glBindTexture(GL_TEXTURE_2D, gRepeatingTexture.getTextureID());
-    switch (gTextureWrapType) {
-    case 0:
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-      printf("%d: GL_REPEAT\n", gTextureWrapType);
-      break;
-
-    case 1:
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-      printf("%d: GL_CLAMP\n", gTextureWrapType);
-      break;
-
-    case 2:
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-      printf("%d: GL_CLAMP_TO_BORDER\n", gTextureWrapType);
-      break;
-
-    case 3:
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-      printf("%d: GL_CLAMP_TO_EDGE\n", gTextureWrapType);
-      break;
-
-    case 4:
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-      printf("%d: GL_MIRRORED_REPEAT\n", gTextureWrapType);
-      break;
-
-    default:
-      break;
-    }
-  }
 }
