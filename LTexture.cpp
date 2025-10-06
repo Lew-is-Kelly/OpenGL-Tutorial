@@ -8,7 +8,7 @@ GLenum DEFAULT_TEXTURE_WRAP = GL_REPEAT;
 LTexture::LTexture() {
   // Initialize texture ID and pixels
   mTextureID = 0;
-  mPixels = NULL;
+  mPixels = nullptr;
 
   // Initialize image dimensions
   mImageWidth = 0;
@@ -42,8 +42,8 @@ bool LTexture::loadTextureFromFile(std::string path) {
     success = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
     if (success == IL_TRUE) {
       // Initialize dimensions
-      GLuint imgWidth = (GLuint)ilGetInteger(IL_IMAGE_WIDTH);
-      GLuint imgHeight = (GLuint)ilGetInteger(IL_IMAGE_HEIGHT);
+      auto imgWidth = (GLuint)ilGetInteger(IL_IMAGE_WIDTH);
+      auto imgHeight = (GLuint)ilGetInteger(IL_IMAGE_HEIGHT);
 
       // Calculate required texture dimensions
       GLuint texWidth = powerOfTwo(imgWidth);
@@ -272,9 +272,9 @@ void LTexture::freeTexture() {
   }
 
   // Delete pixels
-  if (mPixels != NULL) {
+  if (mPixels != nullptr) {
     delete[] mPixels;
-    mPixels = NULL;
+    mPixels = nullptr;
   }
 
   mImageWidth = 0;
@@ -285,7 +285,7 @@ void LTexture::freeTexture() {
 
 bool LTexture::lock() {
   // If texture is not locked and a texture exists
-  if (mPixels == NULL && mTextureID != 0) {
+  if (mPixels == nullptr && mTextureID != 0) {
     // Allocate memory for texture data
     GLuint size = mTextureWidth * mTextureHeight;
     mPixels = new GLuint[size];
@@ -307,7 +307,7 @@ bool LTexture::lock() {
 
 bool LTexture::unlock() {
   // If texture is locked and a texture exists
-  if (mPixels != NULL && mTextureID != 0) {
+  if (mPixels != nullptr && mTextureID != 0) {
     // Set current texture
     glBindTexture(GL_TEXTURE_2D, mTextureID);
 
@@ -317,7 +317,7 @@ bool LTexture::unlock() {
 
     // Delete pixels
     delete[] mPixels;
-    mPixels = NULL;
+    mPixels = nullptr;
 
     // Unbind texture
     glBindTexture(GL_TEXTURE_2D, NULL);
@@ -352,7 +352,7 @@ void LTexture::render(GLfloat x, GLfloat y, LFRect *clip) {
     GLfloat quadHeight = mImageHeight;
 
     // Handle clipping
-    if (clip != NULL) {
+    if (clip != nullptr) {
       // Texture coordinates
       texLeft = clip->x / mTextureWidth;
       texRight = (clip->x + clip->w) / mTextureWidth;

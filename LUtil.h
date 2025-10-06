@@ -2,7 +2,6 @@
 #define LUTIL_H
 
 #include "LOpenGL.h"
-#include <stdio.h>
 
 // Screen constants
 const int SCREEN_WIDTH = 640;

@@ -12,10 +12,20 @@ GLfloat gTexX = 0.f, gTexY = 0.f;
 // Texture wrap type
 int gTextureWrapType = 0;
 
-// Transformation state
-int gTransformationCombo = 0;
-
 bool initGL() {
+  // Initialize GLEW
+  GLenum glewError = glewInit();
+  if (glewError != GLEW_OK) {
+    printf("Error initializing GLEW! %s\n", glewGetErrorString(glewError));
+    return false;
+  }
+
+  // Make sure OpenGL 2.1 is supported
+  if (!GLEW_VERSION_2_1) {
+    printf("OpenGL 2.1 not supported!\n");
+    return false;
+  }
+
   // Set the viewport
   glViewport(0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -54,7 +64,7 @@ bool initGL() {
   // Check for error
   ILenum ilError = ilGetError();
   if (ilError != IL_NO_ERROR) {
-    printf("Error initializing DevIL! %s\n", iluErrorString(ilError));
+    printf("Error initializing DevIL! %s", iluErrorString(ilError));
     return false;
   }
 
@@ -64,14 +74,15 @@ bool initGL() {
 bool loadMedia() {
   // Load texture
   if (!gRepeatingTexture.loadTextureFromFile("texture.png")) {
-    printf("Unable to load OpenGL texture!\n");
+    printf("Unable to load repeating texture!\n");
     return false;
   }
 
   return true;
 }
+
 void update() {
-  // Scroll texrture
+  // Scroll texture
   gTexX++;
   gTexY++;
 
@@ -97,7 +108,7 @@ void render() {
   // Use repeating texture
   glBindTexture(GL_TEXTURE_2D, gRepeatingTexture.getTextureID());
 
-  // Switch to textutre matrix
+  // Switch to texture matrix
   glMatrixMode(GL_TEXTURE);
 
   // Reset transformation
@@ -126,9 +137,9 @@ void render() {
 void handleKeys(unsigned char key, int x, int y) {
   // If q is pressed
   if (key == 'q') {
-    // Cycle through texture reptetitions
+    // Cycle through texture wraps
     gTextureWrapType++;
-    if (gTextureWrapType >= 2) {
+    if (gTextureWrapType >= 5) {
       gTextureWrapType = 0;
     }
 
@@ -145,6 +156,24 @@ void handleKeys(unsigned char key, int x, int y) {
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
       printf("%d: GL_CLAMP\n", gTextureWrapType);
+      break;
+
+    case 2:
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+      printf("%d: GL_CLAMP_TO_BORDER\n", gTextureWrapType);
+      break;
+
+    case 3:
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      printf("%d: GL_CLAMP_TO_EDGE\n", gTextureWrapType);
+      break;
+
+    case 4:
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+      printf("%d: GL_MIRRORED_REPEAT\n", gTextureWrapType);
       break;
 
     default:

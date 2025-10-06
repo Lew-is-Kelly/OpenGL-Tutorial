@@ -1,4 +1,5 @@
 #include "LUtil.h"
+#include <stdio.h>
 
 void runMainLoop(int val);
 /*
@@ -32,6 +33,8 @@ int main(int argc, char *args[]) {
     printf("Unable to load media!\n");
     return 2;
   }
+
+  glutKeyboardFunc(handleKeys);
 
   // Set rendering function
   glutDisplayFunc(render);
