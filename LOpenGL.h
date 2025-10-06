@@ -3,10 +3,10 @@
 
 // clang-format off
 #include <GL/glew.h>
+// clang-format on
+
 #include <GL/freeglut.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <stdio.h>
-// clang-format on
 
 #endif

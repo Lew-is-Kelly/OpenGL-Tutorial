@@ -3,7 +3,6 @@
 
 #include "LFRect.h"
 #include "LOpenGL.h"
-#include <stdio.h>
 #include <string>
 
 class LTexture {
@@ -161,7 +160,7 @@ public:
    -None
   */
 
-  void render(GLfloat x, GLfloat y, LFRect *clip = NULL);
+  void render(GLfloat x, GLfloat y, LFRect *clip = nullptr);
   /*
   Pre Condition:
    -A valid OpenGL context
