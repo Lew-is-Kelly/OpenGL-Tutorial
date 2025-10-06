@@ -1,28 +1,31 @@
-#include "LOpenGL.h"
+#ifndef LUTIL_H
+#define LUTIL_H
 
-// Screen Constants
+#include "LOpenGL.h"
+#include <stdio.h>
+
+// Screen constants
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 const int SCREEN_FPS = 60;
 
-// Colour modes
-const int COLOR_MODE_CYAN = 0;
-const int COLOR_MODE_MULTI = 1;
-
 bool initGL();
 /*
-PreCondition:
-   -A valid OpenGL context
+Pre Condition:
+ -A valid OpenGL context
 Post Condition:
  -Initializes viewport, matrices, and clear color
  -Enables blending
  -Disables depth testing
+ -Initializes GLEW
  -Initializes DevIL and DevIL utilities
  -Reports to console if there was an OpenGL error
+ -Reports to console if there was a GLEW error
  -Reports to console if there was a DevIL error
  -Returns false if there was an error in initialization
 Side Effects:
- -Projection matrix is set to identity matrix
+ -Sets viewport to the fill rendering area
+ -Projection matrix is set to an orthographic matrix
  -Modelview matrix is set to identity matrix
  -Matrix mode is set to modelview
  -Clear color is set to black

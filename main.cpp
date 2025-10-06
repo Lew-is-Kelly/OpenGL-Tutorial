@@ -1,60 +1,55 @@
 #include "LUtil.h"
-#include <stdio.h>
 
 void runMainLoop(int val);
 /*
 Pre Condition:
  -Initialized freeGLUT
 Post Condition:
- -Calls the main loop functions and sets itself to be called back in 1000 / SCREEN_FPS milliseconds
-Side Effects:
- -Sets glutTimerFunc
+ -Calls the main loop functions and sets itself to be called back in 1000 /
+SCREEN_FPS milliseconds Side Effects: -Sets glutTimerFunc
 */
 
-int main(int argc, char* args[]) {
-  //Initialize FreeGLUT
+int main(int argc, char *args[]) {
+  // Initialize FreeGLUT
   glutInit(&argc, args);
 
-  //Create OpenGL 2.1 context
+  // Create OpenGL 2.1 context
   glutInitContextVersion(2, 1);
 
-  //Create Double Buffered Window
+  // Create Double Buffered Window
   glutInitDisplayMode(GLUT_DOUBLE);
   glutInitWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
   glutCreateWindow("OpenGL");
 
-  //Do post window/context creation initialization
+  // Do post window/context creation initialization
   if (!initGL()) {
     printf("Unable to initialize graphics library!\n");
     return 1;
   }
 
-  //Set keyboard handler
-  glutKeyboardFunc(handleKeys);
-
-<<<<<<< HEAD
-  // glutKeyboardFunc(handleKeys);
+  // Load media
+  if (!loadMedia()) {
+    printf("Unable to load media!\n");
+    return 2;
+  }
 
   // Set rendering function
-=======
-  //Set rendering function
->>>>>>> master
   glutDisplayFunc(render);
 
-  //Set main loop
+  // Set main loop
   glutTimerFunc(1000 / SCREEN_FPS, runMainLoop, 0);
 
-  //Start GLUT main loop
+  // Start GLUT main loop
   glutMainLoop();
 
   return 0;
 }
 
 void runMainLoop(int val) {
-  //Frame logic
+  // Frame logic
   update();
   render();
 
-  //Run frame one more time
-  glutTimerFunc(1000 / SCREEN_FPS, runMainLoop, 0);
+  // Run frame one more time
+  glutTimerFunc(1000 / SCREEN_FPS, runMainLoop, val);
 }

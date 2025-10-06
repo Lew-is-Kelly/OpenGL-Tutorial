@@ -1,5 +1,9 @@
 #include "LUtil.h"
+#include "LTexture.h"
+#include <IL/il.h>
+#include <IL/ilu.h>
 
+// VBO rendered texture
 LTexture gVBOTexture;
 
 bool initGL() {
@@ -54,7 +58,7 @@ bool initGL() {
   // Check for error
   ILenum ilError = ilGetError();
   if (ilError != IL_NO_ERROR) {
-    printf("Error initializing DevIL! %s", iluErrorString(ilError));
+    printf("Error initializing DevIL! %s\n", iluErrorString(ilError));
     return false;
   }
 
@@ -62,7 +66,8 @@ bool initGL() {
 }
 
 bool loadMedia() {
-  if (!gVBOTexture.loadTextureFromFile("opengl.png")) {
+  if (!gVBOTexture.loadTextureFromFile(
+          "18_textured_vertex_buffers/opengl.png")) {
     printf("Unable to load OpenGL texture!\n");
     return false;
   }

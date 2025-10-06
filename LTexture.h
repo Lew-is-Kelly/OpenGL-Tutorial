@@ -3,6 +3,7 @@
 
 #include "LFRect.h"
 #include "LOpenGL.h"
+#include <stdio.h>
 #include <string>
 
 class LTexture {
@@ -160,7 +161,7 @@ public:
    -None
   */
 
-  void render(GLfloat x, GLfloat y, LFRect *clip = nullptr);
+  void render(GLfloat x, GLfloat y, LFRect *clip = NULL);
   /*
   Pre Condition:
    -A valid OpenGL context
@@ -170,6 +171,7 @@ public:
    -If given texture clip is NULL, the full image is rendered
   Side Effects:
    -Binds member texture ID
+   -Binds member VBO and IBO
   */
 
   GLuint getTextureID();

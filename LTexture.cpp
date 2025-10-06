@@ -32,37 +32,6 @@ LTexture::~LTexture() {
   freeVBO();
 }
 
-void LTexture::initVBO() {
-  // If texture is loaded and VBO does not already exist
-  if (mTextureID != 0 && mVBOID == 0) {
-    // Vertex data
-    LVertexData2D vData[4];
-    GLuint iData[4];
-
-    // Set rendering indices
-    iData[0] = 0;
-    iData[1] = 1;
-    iData[2] = 2;
-    iData[3] = 3;
-
-    // Create VBO
-    glGenBuffers(1, &mVBOID);
-    glBindBuffer(GL_ARRAY_BUFFER, mVBOID);
-    glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(LVertexData2D), vData,
-                 GL_DYNAMIC_DRAW);
-
-    // Create IBO
-    glGenBuffers(1, &mIBOID);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIBOID);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * sizeof(GLuint), iData,
-                 GL_DYNAMIC_DRAW);
-
-    // Unbind buffers
-    glBindBuffer(GL_ARRAY_BUFFER, NULL);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, NULL);
-  }
-}
-
 bool LTexture::loadTextureFromFile(std::string path) {
   // Texture loading success
   bool textureLoaded = false;
@@ -81,8 +50,8 @@ bool LTexture::loadTextureFromFile(std::string path) {
     success = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
     if (success == IL_TRUE) {
       // Initialize dimensions
-      auto imgWidth = (GLuint)ilGetInteger(IL_IMAGE_WIDTH);
-      auto imgHeight = (GLuint)ilGetInteger(IL_IMAGE_HEIGHT);
+      GLuint imgWidth = (GLuint)ilGetInteger(IL_IMAGE_WIDTH);
+      GLuint imgHeight = (GLuint)ilGetInteger(IL_IMAGE_HEIGHT);
 
       // Calculate required texture dimensions
       GLuint texWidth = powerOfTwo(imgWidth);
@@ -135,8 +104,8 @@ bool LTexture::loadPixelsFromFile(std::string path) {
     success = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
     if (success == IL_TRUE) {
       // Initialize dimensions
-      auto imgWidth = (GLuint)ilGetInteger(IL_IMAGE_WIDTH);
-      auto imgHeight = (GLuint)ilGetInteger(IL_IMAGE_HEIGHT);
+      GLuint imgWidth = (GLuint)ilGetInteger(IL_IMAGE_WIDTH);
+      GLuint imgHeight = (GLuint)ilGetInteger(IL_IMAGE_HEIGHT);
 
       // Calculate required texture dimensions
       GLuint texWidth = powerOfTwo(imgWidth);
@@ -190,7 +159,7 @@ bool LTexture::loadTextureFromFileWithColorKey(std::string path, GLubyte r,
   GLuint size = mTextureWidth * mTextureHeight;
   for (int i = 0; i < size; ++i) {
     // Get pixel colors
-    auto *colors = (GLubyte *)&mPixels[i];
+    GLubyte *colors = (GLubyte *)&mPixels[i];
 
     // Color matches
     if (colors[0] == r && colors[1] == g && colors[2] == b &&
@@ -212,7 +181,7 @@ bool LTexture::loadTextureFromPixels32() {
   bool success = true;
 
   // There is loaded pixels
-  if (mTextureID == 0 && mPixels != nullptr) {
+  if (mTextureID == 0 && mPixels != NULL) {
     // Generate texture ID
     glGenTextures(1, &mTextureID);
 
@@ -226,9 +195,11 @@ bool LTexture::loadTextureFromPixels32() {
     // Set texture parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, DEFAULT_TEXTURE_WRAP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, DEFAULT_TEXTURE_WRAP);
 
     // Unbind texture
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_2D, NULL);
 
     // Check for error
     GLenum error = glGetError();
@@ -239,7 +210,10 @@ bool LTexture::loadTextureFromPixels32() {
     } else {
       // Release pixels
       delete[] mPixels;
-      mPixels = nullptr;
+      mPixels = NULL;
+
+      // Generate VBO
+      initVBO();
     }
   }
   // Error
@@ -251,7 +225,7 @@ bool LTexture::loadTextureFromPixels32() {
       printf("A texture is already loaded!\n");
     }
     // No pixel loaded
-    else if (mPixels == nullptr) {
+    else if (mPixels == NULL) {
       printf("No pixels to create texture from!\n");
     }
 
@@ -314,9 +288,9 @@ void LTexture::freeTexture() {
   }
 
   // Delete pixels
-  if (mPixels != nullptr) {
+  if (mPixels != NULL) {
     delete[] mPixels;
-    mPixels = nullptr;
+    mPixels = NULL;
   }
 
   mImageWidth = 0;
@@ -327,7 +301,7 @@ void LTexture::freeTexture() {
 
 bool LTexture::lock() {
   // If texture is not locked and a texture exists
-  if (mPixels == nullptr && mTextureID != 0) {
+  if (mPixels == NULL && mTextureID != 0) {
     // Allocate memory for texture data
     GLuint size = mTextureWidth * mTextureHeight;
     mPixels = new GLuint[size];
@@ -339,7 +313,7 @@ bool LTexture::lock() {
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, mPixels);
 
     // Unbind texture
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_2D, NULL);
 
     return true;
   }
@@ -349,7 +323,7 @@ bool LTexture::lock() {
 
 bool LTexture::unlock() {
   // If texture is locked and a texture exists
-  if (mPixels != nullptr && mTextureID != 0) {
+  if (mPixels != NULL && mTextureID != 0) {
     // Set current texture
     glBindTexture(GL_TEXTURE_2D, mTextureID);
 
@@ -359,7 +333,7 @@ bool LTexture::unlock() {
 
     // Delete pixels
     delete[] mPixels;
-    mPixels = nullptr;
+    mPixels = NULL;
 
     // Unbind texture
     glBindTexture(GL_TEXTURE_2D, NULL);
@@ -432,18 +406,6 @@ void LTexture::render(GLfloat x, GLfloat y, LFRect *clip) {
     vData[3].position.x = 0.f;
     vData[3].position.y = quadHeight;
 
-    // Render textured quad
-    glBegin(GL_QUADS);
-    glTexCoord2f(texLeft, texTop);
-    glVertex2f(0.f, 0.f);
-    glTexCoord2f(texRight, texTop);
-    glVertex2f(quadWidth, 0.f);
-    glTexCoord2f(texRight, texBottom);
-    glVertex2f(quadWidth, quadHeight);
-    glTexCoord2f(texLeft, texBottom);
-    glVertex2f(0.f, quadHeight);
-    glEnd();
-
     // Set texture ID
     glBindTexture(GL_TEXTURE_2D, mTextureID);
 
@@ -475,14 +437,6 @@ void LTexture::render(GLfloat x, GLfloat y, LFRect *clip) {
   }
 }
 
-void LTexture::freeVBO() {
-  // Free VBO and IBO
-  if (mVBOID != 0) {
-    glDeleteBuffers(1, &mVBOID);
-    glDeleteBuffers(1, &mIBOID);
-  }
-}
-
 GLuint LTexture::getTextureID() { return mTextureID; }
 
 GLuint LTexture::textureWidth() { return mTextureWidth; }
@@ -505,4 +459,43 @@ GLuint LTexture::powerOfTwo(GLuint num) {
   }
 
   return num;
+}
+
+void LTexture::initVBO() {
+  // If texture is loaded and VBO does not already exist
+  if (mTextureID != 0 && mVBOID == 0) {
+    // Vertex data
+    LVertexData2D vData[4];
+    GLuint iData[4];
+
+    // Set rendering indices
+    iData[0] = 0;
+    iData[1] = 1;
+    iData[2] = 2;
+    iData[3] = 3;
+
+    // Create VBO
+    glGenBuffers(1, &mVBOID);
+    glBindBuffer(GL_ARRAY_BUFFER, mVBOID);
+    glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(LVertexData2D), vData,
+                 GL_DYNAMIC_DRAW);
+
+    // Create IBO
+    glGenBuffers(1, &mIBOID);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIBOID);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * sizeof(GLuint), iData,
+                 GL_DYNAMIC_DRAW);
+
+    // Unbind buffers
+    glBindBuffer(GL_ARRAY_BUFFER, NULL);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, NULL);
+  }
+}
+
+void LTexture::freeVBO() {
+  // Free VBO and IBO
+  if (mVBOID != 0) {
+    glDeleteBuffers(1, &mVBOID);
+    glDeleteBuffers(1, &mIBOID);
+  }
 }
