@@ -64,14 +64,4 @@ Side Effects:
  -Swaps the front/back buffer
 */
 
-void handleKeys(unsigned char key, int x, int y);
-/*
-Pre Condition:
- -None
-Post Condition:
- -Cycles through the transformation combinations when the user presses q
-Side Effects:
- -None
-*/
-
 #endif

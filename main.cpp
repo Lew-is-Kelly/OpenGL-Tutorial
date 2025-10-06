@@ -34,7 +34,7 @@ int main(int argc, char *args[]) {
     return 2;
   }
 
-  glutKeyboardFunc(handleKeys);
+  // glutKeyboardFunc(handleKeys);
 
   // Set rendering function
   glutDisplayFunc(render);

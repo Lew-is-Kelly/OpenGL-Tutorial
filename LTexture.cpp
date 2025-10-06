@@ -96,8 +96,8 @@ bool LTexture::loadPixelsFromFile(std::string path) {
     success = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
     if (success == IL_TRUE) {
       // Initialize dimensions
-      GLuint imgWidth = (GLuint)ilGetInteger(IL_IMAGE_WIDTH);
-      GLuint imgHeight = (GLuint)ilGetInteger(IL_IMAGE_HEIGHT);
+      auto imgWidth = (GLuint)ilGetInteger(IL_IMAGE_WIDTH);
+      auto imgHeight = (GLuint)ilGetInteger(IL_IMAGE_HEIGHT);
 
       // Calculate required texture dimensions
       GLuint texWidth = powerOfTwo(imgWidth);
@@ -151,7 +151,7 @@ bool LTexture::loadTextureFromFileWithColorKey(std::string path, GLubyte r,
   GLuint size = mTextureWidth * mTextureHeight;
   for (int i = 0; i < size; ++i) {
     // Get pixel colors
-    GLubyte *colors = (GLubyte *)&mPixels[i];
+    auto *colors = (GLubyte *)&mPixels[i];
 
     // Color matches
     if (colors[0] == r && colors[1] == g && colors[2] == b &&
@@ -173,7 +173,7 @@ bool LTexture::loadTextureFromPixels32() {
   bool success = true;
 
   // There is loaded pixels
-  if (mTextureID == 0 && mPixels != NULL) {
+  if (mTextureID == 0 && mPixels != nullptr) {
     // Generate texture ID
     glGenTextures(1, &mTextureID);
 
@@ -200,7 +200,7 @@ bool LTexture::loadTextureFromPixels32() {
     } else {
       // Release pixels
       delete[] mPixels;
-      mPixels = NULL;
+      mPixels = nullptr;
     }
   }
   // Error
@@ -212,7 +212,7 @@ bool LTexture::loadTextureFromPixels32() {
       printf("A texture is already loaded!\n");
     }
     // No pixel loaded
-    else if (mPixels == NULL) {
+    else if (mPixels == nullptr) {
       printf("No pixels to create texture from!\n");
     }
 
