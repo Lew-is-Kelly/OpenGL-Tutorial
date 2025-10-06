@@ -360,4 +360,17 @@ MigrationBackup/
 .ionide/
 
 # Fody - auto-generated XML schema
+<<<<<<< HEAD
 FodyWeavers.xsd
+
+# Demo solutions from LazyFoo
+Solutions/
+
+# Code stuff
+.vscode/
+
+# Sonar Qube
+compile_commands.json
+
+# Linux binary
+OpenGL-Tutorial
