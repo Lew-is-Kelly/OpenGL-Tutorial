@@ -1,7 +1,4 @@
 #include "LUtil.h"
-#include "LTexture.h"
-#include <IL/il.h>
-#include <IL/ilu.h>
 
 LTexture gVBOTexture;
 
