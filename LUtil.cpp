@@ -66,16 +66,17 @@ bool initGL() {
 }
 
 bool loadMedia() {
-  if (!gVBOTexture.loadTextureFromFile(
-          "18_textured_vertex_buffers/opengl.png")) {
-    printf("Unable to load OpenGL texture!\n");
+  if (!gVBOTexture.loadTextureFromFile("opengl.png")) {
+    printf("Unable to load OpenGL texture! Check LUtil.cpp load media path.\n");
     return false;
   }
 
   return true;
 }
 
-void update() {}
+void update() {
+  // Does nothing right now
+}
 
 void render() {
   // Clear color buffer

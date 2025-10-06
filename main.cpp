@@ -1,4 +1,6 @@
+#include "LOpenGL.h"
 #include "LUtil.h"
+#include <stdio.h>
 
 void runMainLoop(int val);
 /*
