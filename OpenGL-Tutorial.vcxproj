@@ -30,7 +30,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -75,8 +75,8 @@
     <LibraryPath>C:\vs_dev_lib\freeglut\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\vs_dev_lib\freeglut\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\vs_dev_lib\freeglut\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\vs_dev_lib\glew-2.1.0\include;C:\vs_dev_lib\DevIL Windows SDK\include;C:\vs_dev_lib\freeglut\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\vs_dev_lib\glew-2.1.0\lib\Release\Win32;C:\vs_dev_lib\DevIL Windows SDK\lib\x86\Release;C:\vs_dev_lib\freeglut\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -89,7 +89,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
-      <AdditionalDependencies>OpenGL32.lib;freeglut.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Glew32.lib;ILUT.lib;DevIL.lib;ILU.lib;OpenGL32.lib;freeglut.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -135,12 +135,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="LTexture.cpp" />
     <ClCompile Include="LUtil.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="LFRect.h" />
     <ClInclude Include="LOpenGL.h" />
+    <ClInclude Include="LTexCoord.h" />
+    <ClInclude Include="LTexture.h" />
     <ClInclude Include="LUtil.h" />
+    <ClInclude Include="LVertexData2D.h" />
+    <ClInclude Include="LVertexPos2D.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
