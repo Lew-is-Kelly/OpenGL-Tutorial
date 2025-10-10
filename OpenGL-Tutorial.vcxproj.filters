@@ -21,12 +21,30 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LOpenGL.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="LUtil.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LFRect.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LTexCoord.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LTexture.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LVertexData2D.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LVertexPos2D.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
