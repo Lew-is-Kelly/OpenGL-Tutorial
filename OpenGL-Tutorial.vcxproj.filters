@@ -24,6 +24,9 @@
     <ClCompile Include="LTexture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LSpriteSheet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LOpenGL.h">
@@ -45,6 +48,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="LVertexPos2D.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LSpriteSheet.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

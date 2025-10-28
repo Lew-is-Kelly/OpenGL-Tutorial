@@ -4,6 +4,7 @@
 #include "LFRect.h"
 #include "LOpenGL.h"
 #include <string>
+#include "LFRect.h"
 
 class LTexture {
 public:
@@ -17,7 +18,7 @@ public:
    -None
   */
 
-  ~LTexture();
+  virtual ~LTexture();
   /*
   Pre Condition:
    -None
@@ -94,16 +95,16 @@ public:
    -Binds a NULL texture
   */
 
-  void freeTexture();
+  virtual void freeTexture();
   /*
   Pre Condition:
-   -A valid OpenGL context
+    -A valid OpenGL context
   Post Condition:
-   -Deletes texture if it exists
-   -Deletes member pixels if they exist
-   -Sets texture ID to 0
+    -Deletes texture if it exists
+    -Deletes member pixels if they exist
+    -Sets texture ID to 0
   Side Effects:
-   -None
+    -None
   */
 
   bool lock();

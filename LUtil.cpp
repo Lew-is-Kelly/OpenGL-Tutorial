@@ -1,10 +1,10 @@
 #include "LUtil.h"
-#include "LTexture.h"
+#include "LSpriteSheet.h"
 #include <IL/il.h>
 #include <IL/ilu.h>
 
 // VBO rendered texture
-LTexture gVBOTexture;
+LSpriteSheet gArrowSprites;
 
 bool initGL() {
   // Initialize GLEW
@@ -66,8 +66,40 @@ bool initGL() {
 }
 
 bool loadMedia() {
-  if (!gVBOTexture.loadTextureFromFile("opengl.png")) {
-    printf("Unable to load OpenGL texture! Check LUtil.cpp load media path.\n");
+  //Load texture
+  if (!gArrowSprites.loadTextureFromFile("arrows.png"))
+  {
+    printf("Unable to load sprite sheet!\n");
+    return false;
+  }
+
+  //Set clips
+  LFRect clip = { 0.f, 0.f, 128.f, 128.f };
+
+  //Top left
+  clip.x = 0.f;
+  clip.y = 0.f;
+  gArrowSprites.addClipSprite(clip);
+
+  //Top right
+  clip.x = 128.f;
+  clip.y = 0.f;
+  gArrowSprites.addClipSprite(clip);
+
+  //Bottom left
+  clip.x = 0.f;
+  clip.y = 128.f;
+  gArrowSprites.addClipSprite(clip);
+
+  //Bottom right
+  clip.x = 128.f;
+  clip.y = 128.f;
+  gArrowSprites.addClipSprite(clip);
+
+  //Generate VBO
+  if (!gArrowSprites.generateDataBuffer())
+  {
+    printf("Unable to clip sprite sheet!\n");
     return false;
   }
 
@@ -79,16 +111,29 @@ void update() {
 }
 
 void render() {
-  // Clear color buffer
+  //Clear color buffer
   glClear(GL_COLOR_BUFFER_BIT);
 
-  // Initialize modelview matrix
+  //Render top left arrow
   glLoadIdentity();
+  glTranslatef(64.f, 64.f, 0.f);
+  gArrowSprites.renderSprite(0);
 
-  // Render textured quad using VBOs
-  gVBOTexture.render((SCREEN_WIDTH - gVBOTexture.imageWidth()) / 2.f,
-                     (SCREEN_HEIGHT - gVBOTexture.imageHeight()) / 2.f);
+  //Render top right arrow
+  glLoadIdentity();
+  glTranslatef(SCREEN_WIDTH - 64.f, 64.f, 0.f);
+  gArrowSprites.renderSprite(1);
 
-  // Update screen
+  //Render bottom left arrow
+  glLoadIdentity();
+  glTranslatef(64.f, SCREEN_HEIGHT - 64.f, 0.f);
+  gArrowSprites.renderSprite(2);
+
+  //Render bottom right arrow
+  glLoadIdentity();
+  glTranslatef(SCREEN_WIDTH - 64.f, SCREEN_HEIGHT - 64.f, 0.f);
+  gArrowSprites.renderSprite(3);
+
+  //Update screen
   glutSwapBuffers();
 }
