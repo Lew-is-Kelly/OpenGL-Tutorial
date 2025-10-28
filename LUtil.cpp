@@ -1,10 +1,12 @@
 #include "LUtil.h"
 #include "LSpriteSheet.h"
+#include "LFont.h"
 #include <IL/il.h>
 #include <IL/ilu.h>
 
-// VBO rendered texture
-LSpriteSheet gArrowSprites;
+
+
+LFont gFont;
 
 bool initGL() {
   // Initialize GLEW
@@ -65,41 +67,12 @@ bool initGL() {
   return true;
 }
 
-bool loadMedia() {
-  //Load texture
-  if (!gArrowSprites.loadTextureFromFile("arrows.png"))
+bool loadMedia()
+{
+  //Load Font
+  if (!gFont.loadBitmap("lazy_font.png"))
   {
-    printf("Unable to load sprite sheet!\n");
-    return false;
-  }
-
-  //Set clips
-  LFRect clip = { 0.f, 0.f, 128.f, 128.f };
-
-  //Top left
-  clip.x = 0.f;
-  clip.y = 0.f;
-  gArrowSprites.addClipSprite(clip);
-
-  //Top right
-  clip.x = 128.f;
-  clip.y = 0.f;
-  gArrowSprites.addClipSprite(clip);
-
-  //Bottom left
-  clip.x = 0.f;
-  clip.y = 128.f;
-  gArrowSprites.addClipSprite(clip);
-
-  //Bottom right
-  clip.x = 128.f;
-  clip.y = 128.f;
-  gArrowSprites.addClipSprite(clip);
-
-  //Generate VBO
-  if (!gArrowSprites.generateDataBuffer())
-  {
-    printf("Unable to clip sprite sheet!\n");
+    printf("Unable to load bitmap font!\n");
     return false;
   }
 
@@ -110,29 +83,15 @@ void update() {
   // Does nothing right now
 }
 
-void render() {
+void render()
+{
   //Clear color buffer
   glClear(GL_COLOR_BUFFER_BIT);
-
-  //Render top left arrow
   glLoadIdentity();
-  glTranslatef(64.f, 64.f, 0.f);
-  gArrowSprites.renderSprite(0);
 
-  //Render top right arrow
-  glLoadIdentity();
-  glTranslatef(SCREEN_WIDTH - 64.f, 64.f, 0.f);
-  gArrowSprites.renderSprite(1);
-
-  //Render bottom left arrow
-  glLoadIdentity();
-  glTranslatef(64.f, SCREEN_HEIGHT - 64.f, 0.f);
-  gArrowSprites.renderSprite(2);
-
-  //Render bottom right arrow
-  glLoadIdentity();
-  glTranslatef(SCREEN_WIDTH - 64.f, SCREEN_HEIGHT - 64.f, 0.f);
-  gArrowSprites.renderSprite(3);
+  //Render red text
+  glColor3f(1.f, 0.f, 0.f);
+  gFont.renderText(0.f, 0.f, "The quick brown fox jumps\nover the lazy dog");
 
   //Update screen
   glutSwapBuffers();

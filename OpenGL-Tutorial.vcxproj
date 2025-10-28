@@ -145,12 +145,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="LFont.cpp" />
     <ClCompile Include="LSpriteSheet.cpp" />
     <ClCompile Include="LTexture.cpp" />
     <ClCompile Include="LUtil.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="LFont.h" />
     <ClInclude Include="LFRect.h" />
     <ClInclude Include="LOpenGL.h" />
     <ClInclude Include="LSpriteSheet.h" />
